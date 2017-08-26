@@ -1,0 +1,19 @@
+? Project name timer
+? Project description A Vue.js project
+? Author Alan Richey <adrichey@gmail.com>
+? Vue build standalone
+? Install vue-router? No
+? Use ESLint to lint your code? Yes
+? Pick an ESLint preset Airbnb
+? Setup unit tests with Karma + Mocha? Yes
+? Setup e2e tests with Nightwatch? Yes
+
+   vue-cli · Generated "Timer".
+
+   To get started:
+   
+     cd Timer
+     npm install
+     npm run dev
+   
+   Documentation can be found at https://vuejs-templates.github.io/webpack
