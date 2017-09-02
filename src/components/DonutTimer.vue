@@ -7,6 +7,11 @@ const d3 = require('d3');
 
 export default {
   name: 'donut-timer',
+  data: () => ({
+    hours: 0,
+    minutes: 1,
+    seconds: 4,
+  }),
   mounted() {
     // Get the viewport boundaries
     const windowWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
@@ -59,20 +64,28 @@ export default {
 
     // Timer functionality
     let timerPercentage = 0.00;
+    const minutes = (this.minutes * 60);
+    const hours = (this.hours * 60 * 60);
+    const timeFraction = (100 / (this.seconds + minutes + hours)) * 0.01;
 
     d3.interval(() => {
-      timerPercentage = timerPercentage >= 1 ? 0.00 : timerPercentage + 0.01;
+      timerPercentage = timerPercentage >= 1 ? 0.00 : timerPercentage + timeFraction;
       foreground.transition()
-          .duration(750)
-          .attrTween('d', arcTween(timerPercentage * tau));
-    }, 1500);
+        .duration(750)
+        .attrTween('d', arcTween(timerPercentage * tau));
+    }, 1000);
   },
 };
 </script>
 
 <style>
-  svg {
-    display: block;
-    margin: 0 auto;
+  .timer {
+    background-color: blue;
+
+    svg {
+      display: block;
+      margin: 0 auto;
+      background-color: red;
+    }
   }
 </style>
