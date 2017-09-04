@@ -28,6 +28,23 @@ export default {
     timeRemaining: 0,
     started: 0, // 0 is paused, 1 is started
   }),
+  computed: {
+    timeReadable() {
+      return `${this.hoursReadable}:${this.minutesReadable}:${this.secondsReadable}`;
+    },
+    hoursReadable() {
+      const hrs = Math.floor((this.timeRemaining / 60 / 60));
+      return hrs >= 10 ? hrs : `0${hrs}`;
+    },
+    minutesReadable() {
+      const min = Math.floor((this.timeRemaining / 60) % 60);
+      return min >= 10 ? min : `0${min}`;
+    },
+    secondsReadable() {
+      const sec = Math.ceil(this.timeRemaining % 60);
+      return sec >= 10 ? sec : `0${sec}`;
+    },
+  },
   mounted() {
     // Get the viewport boundaries
     const windowWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
@@ -49,7 +66,7 @@ export default {
     text = svg.append('text')
       .text('0')
       .attr('text-anchor', 'middle')
-      .style('font-size', `${radius / 2}px`)
+      .style('font-size', `${radius / 4}px`)
       .attr('fill', 'red')
       .attr('x', radius);
 
@@ -100,7 +117,7 @@ export default {
       this.timeRemaining = this.seconds + minutes + hours;
       const timeFraction = (100 / (this.timeRemaining)) * 0.01;
 
-      text.text(this.timeRemaining);
+      text.text(this.timeReadable);
       foreground.transition()
         .duration(1000)
         .attrTween('d', this.arcTween(timerPercentage * tau));
@@ -114,7 +131,7 @@ export default {
             .duration(750)
             .attrTween('d', this.arcTween(timerPercentage * tau));
           this.timeRemaining -= 1;
-          text.text(this.timeRemaining);
+          text.text(this.timeReadable);
         }
       }, 1000);
     },
