@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <donut-timer></donut-timer>
-    <time-segment-selector></time-segment-selector>
   </div>
 </template>
 
@@ -21,5 +20,9 @@ export default {
 <style>
   body {
     margin: 0;
+  }
+  #app {
+    height: 100vh;
+    width: 100vw;
   }
 </style>
