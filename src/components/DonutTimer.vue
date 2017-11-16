@@ -1,9 +1,15 @@
 <template>
   <div class="timer">
-    <svg></svg>
+    <svg>
+      <!-- icomoon.io -->
+      <symbol id="icon-spinner11" viewBox="0 0 32 32">
+        <title>spinner11</title>
+        <path d="M32 12h-12l4.485-4.485c-2.267-2.266-5.28-3.515-8.485-3.515s-6.219 1.248-8.485 3.515c-2.266 2.267-3.515 5.28-3.515 8.485s1.248 6.219 3.515 8.485c2.267 2.266 5.28 3.515 8.485 3.515s6.219-1.248 8.485-3.515c0.189-0.189 0.371-0.384 0.546-0.583l3.010 2.634c-2.933 3.349-7.239 5.464-12.041 5.464-8.837 0-16-7.163-16-16s7.163-16 16-16c4.418 0 8.418 1.791 11.313 4.687l4.687-4.687v12z"></path>
+      </symbol>
+      <use id="reset-button" xlink:href="#icon-spinner11" @click="timerReset"></use>
+    </svg>
     <div class="timer-controls">
-      <button class="timerToggle" v-on:click="timerToggle">{{ started ? 'Stop Timer' : 'Start Timer' }}</button>
-      <button class="timerReset" v-on:click="timerReset">Reset Timer</button>
+      <button class="timerToggle" @click="timerToggle">{{ started ? 'Stop Timer' : 'Start Timer' }}</button>
     </div>
   </div>
 </template>
@@ -18,13 +24,37 @@ let g;
 let text;
 let arc;
 let foreground;
+let reload;
 
 export default {
   name: 'donut-timer',
+  props: {
+    hours: {
+      type: Number,
+      default: 0,
+      required: true,
+      validator(value) {
+        return value >= 0 && value <= 59;
+      },
+    },
+    minutes: {
+      type: Number,
+      default: 0,
+      required: true,
+      validator(value) {
+        return value >= 0 && value <= 59;
+      },
+    },
+    seconds: {
+      type: Number,
+      default: 0,
+      required: true,
+      validator(value) {
+        return value >= 0 && value <= 59;
+      },
+    },
+  },
   data: () => ({
-    hours: 0,
-    minutes: 1,
-    seconds: 4,
     timeRemaining: 0,
     started: 0, // 0 is paused, 1 is started
   }),
@@ -71,6 +101,15 @@ export default {
       .attr('x', radius);
 
     text.attr('y', radius + (text.node().getBoundingClientRect().height / 4));
+
+    reload = svg.select('use#reset-button')
+      .style('fill', '#ff0000')
+      .attr('width', `${radius / 6}px`)
+      .attr('height', `${radius / 6}px`);
+
+    reload
+      .attr('x', radius - (reload.node().getBoundingClientRect().width / 4))
+      .attr('y', radius + (reload.node().getBoundingClientRect().height / 2));
 
     // Create the donut chart
     arc = d3.arc()

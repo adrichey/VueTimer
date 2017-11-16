@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <donut-timer></donut-timer>
+    <donut-timer :minutes="2" :seconds="4"></donut-timer>
   </div>
 </template>
 
