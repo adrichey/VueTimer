@@ -1,12 +1,24 @@
 <template>
-  <div class="timer">
-    <svg>
-      <!-- icomoon.io -->
-      <symbol id="icon-spinner11" viewBox="0 0 32 32">
-        <title>spinner11</title>
-        <path d="M32 12h-12l4.485-4.485c-2.267-2.266-5.28-3.515-8.485-3.515s-6.219 1.248-8.485 3.515c-2.266 2.267-3.515 5.28-3.515 8.485s1.248 6.219 3.515 8.485c2.267 2.266 5.28 3.515 8.485 3.515s6.219-1.248 8.485-3.515c0.189-0.189 0.371-0.384 0.546-0.583l3.010 2.634c-2.933 3.349-7.239 5.464-12.041 5.464-8.837 0-16-7.163-16-16s7.163-16 16-16c4.418 0 8.418 1.791 11.313 4.687l4.687-4.687v12z"></path>
-      </symbol>
-      <use id="reset-button" xlink:href="#icon-spinner11" @click="timerReset"></use>
+  <div id="timer" :style="{ 'background-color': backgroundColor }">
+    <svg id="donut" width="100%" height="100%" preserveAspectRatio="xMinYMin meet" :viewBox="donutViewBox">
+      <g :transform="gTransform"></g>
+      <text id="countdown" text-anchor="middle" :fill="foregroundColor" :x="radius" :style="{ 'font-size': fontSize }">--:--:--</text>
+      <svg id="reset" :width="fontSize" :height="fontSize" :fill="foregroundColor" @click="timerReset" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+          <rect class="opacity-0" width="100%" height="100%" />
+          <g display="none">
+              <polygon display="inline" points="85.982,15.043 14.018,15.043 41.006,42.031 41.006,84.957 58.996,72.963 58.996,42.031  "></polygon>
+          </g>
+          <g display="none">
+              <path display="inline" d="M76.592,85.935l-11.32-17.052l7.006-6.496V15.922c0-1.024-0.832-1.856-1.859-1.856H29.314   c-1.027,0-1.861,0.832-1.861,1.856v46.465l7.17,6.644L23.408,85.935h6.404l8.775-13.227l0.07,0.064h22.414l0.238-0.221   l8.875,13.383H76.592z M62.004,64.233c-2.355,0-4.266-1.907-4.266-4.27c0-2.356,1.91-4.266,4.266-4.266   c2.357,0,4.27,1.909,4.27,4.266C66.273,62.326,64.361,64.233,62.004,64.233z M43.463,17.634h12.805v4.406H43.463V17.634z    M33.859,26.169h32.012V45.38H33.859V26.169z M38.525,64.233c-2.357,0-4.268-1.907-4.268-4.27c0-2.356,1.91-4.266,4.268-4.266   c2.359,0,4.271,1.909,4.271,4.266C42.797,62.326,40.885,64.233,38.525,64.233z"></path>
+          </g>
+          <g>
+              <path d="M77.845,26.948c-6.625-7.896-16.55-12.932-27.689-12.932c-19.975,0-36.138,16.107-36.138,35.984h14.395   c0-11.961,9.765-21.691,21.786-21.691c7.191,0,13.567,3.501,17.538,8.867l-8.464,8.088l26.71-0.012V18.667L77.845,26.948z"></path>
+              <path d="M49.799,71.687c-7.193,0-13.565-3.5-17.539-8.867l8.464-8.086l-26.706,0.012V81.33l8.134-8.281   c6.625,7.896,16.551,12.935,27.69,12.935c19.978,0,36.141-16.11,36.141-35.986H71.584C71.584,61.956,61.819,71.687,49.799,71.687z"></path>
+          </g>
+          <g display="none">
+              <polygon display="inline" points="32.01,14.02 67.99,50.002 32.01,85.98  "></polygon>
+          </g>
+      </svg>
     </svg>
     <div class="timer-controls">
       <button class="timerToggle" @click="timerToggle">{{ started ? 'Stop Timer' : 'Start Timer' }}</button>
@@ -21,7 +33,6 @@ const tau = 2 * Math.PI;
 let interval;
 let svg;
 let g;
-let text;
 let arc;
 let foreground;
 let reload;
@@ -53,6 +64,14 @@ export default {
         return value >= 0 && value <= 59;
       },
     },
+    foregroundColor: {
+      type: String,
+      default: '#000000',
+    },
+    backgroundColor: {
+      type: String,
+      default: '#ffffff',
+    },
   },
   data: () => ({
     timeRemaining: 0,
@@ -74,65 +93,72 @@ export default {
       const sec = Math.ceil(this.timeRemaining % 60);
       return sec >= 10 ? sec : `0${sec}`;
     },
+    windowWidth() {
+      return Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    },
+    windowHeight() {
+      return Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    },
+    svgBounds() {
+      return this.windowHeight <= this.windowWidth ? this.windowHeight : this.windowWidth;
+    },
+    radius() {
+      return this.svgBounds / 2;
+    },
+    fontSize() {
+      return `${this.radius / 5}px`;
+    },
+    donutViewBox() {
+      // Set the SVG donut chart viewBox to fit the window
+      return `0 0 ${this.svgBounds} ${this.svgBounds}`;
+    },
+    gTransform() {
+      return `translate(${this.radius},${this.radius})`;
+    },
   },
   mounted() {
-    // Get the viewport boundaries
-    const windowWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    const windowHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    const svgBounds = windowHeight <= windowWidth ? windowHeight : windowWidth;
-
-    // D3 variables
-    const radius = svgBounds / 2;
-
     // Center the SVG and set its boundaries to fit the window
-    svg = d3.select('svg')
-      .attr('width', '100%')
-      .attr('height', '100%')
-      .attr('viewBox', `0 0 ${svgBounds} ${svgBounds}`)
-      .attr('preserveAspectRatio', 'xMinYMin meet');
-    g = svg.append('g')
-      .attr('transform', `translate(${radius},${radius})`);
+    svg = d3.select('svg#donut');
+    g = d3.select('svg#donut > g');
 
-    text = svg.append('text')
-      .text('0')
-      .attr('text-anchor', 'middle')
-      .style('font-size', `${radius / 4}px`)
-      .attr('fill', 'red')
-      .attr('x', radius);
+    // The following must be set during mount as d3.select will not run otherwise
+    this.setCountdownY();
 
-    text.attr('y', radius + (text.node().getBoundingClientRect().height / 4));
-
-    reload = svg.select('use#reset-button')
-      .style('fill', '#ff0000')
-      .attr('width', `${radius / 6}px`)
-      .attr('height', `${radius / 6}px`);
+    reload = svg.select('#reset')
+      .style('fill', this.foregroundColor)
+      .attr('width', `${this.radius / 5}px`)
+      .attr('height', `${this.radius / 5}px`);
 
     reload
-      .attr('x', radius - (reload.node().getBoundingClientRect().width / 4))
-      .attr('y', radius + (reload.node().getBoundingClientRect().height / 2));
+      .attr('x', this.radius - (reload.node().getBoundingClientRect().width / 2))
+      .attr('y', this.radius + (reload.node().getBoundingClientRect().height / 1.5));
 
     // Create the donut chart
     arc = d3.arc()
-      .innerRadius(radius - (radius / 2))
-      .outerRadius(radius)
+      .innerRadius(this.radius - (this.radius / 2))
+      .outerRadius(this.radius)
       .startAngle(0);
 
     // Background - Time remaining
     g.append('path')
       .datum({ endAngle: tau })
-      .style('fill', '#ff0000')
+      .style('fill', this.foregroundColor)
       .attr('d', arc);
 
     // Foreground - Time expired
     foreground = g.append('path')
       .datum({ endAngle: 0 * tau })
-      .style('fill', '#ffffff')
+      .style('fill', this.backgroundColor)
       .attr('d', arc);
 
     // Begin the timer
     this.timerReset();
   },
   methods: {
+    setCountdownY() {
+      const text = d3.select('text#countdown');
+      text.attr('y', this.radius + (text.node().getBoundingClientRect().height / 4));
+    },
     // Animation tweening
     arcTween(newAngle) {
       return (d) => {
@@ -155,6 +181,7 @@ export default {
       const hours = (this.hours * 60 * 60);
       this.timeRemaining = this.seconds + minutes + hours;
       const timeFraction = (100 / (this.timeRemaining)) * 0.01;
+      const text = d3.select('text#countdown');
 
       text.text(this.timeReadable);
       foreground.transition()
@@ -179,7 +206,11 @@ export default {
 </script>
 
 <style>
-  .timer {
+  .opacity-0 {
+    opacity: 0;
+  }
+
+  #timer {
     height: 100%;
     width: 100%;
     display: flex;
@@ -187,8 +218,13 @@ export default {
     justify-content: center;
   }
 
-  .timer svg {
+  /* Needed to center the SVGs on the page */
+  #timer svg {
     width: auto;
+  }
+
+  #countdown {
+    font-family: 'Impact';
   }
 
   .timer-controls {

@@ -1,6 +1,12 @@
 <template>
   <div id="app">
-    <donut-timer :minutes="2" :seconds="4"></donut-timer>
+    <donut-timer
+      :background-color="backgroundColor"
+      :foreground-color="foregroundColor"
+      :hours="hours"
+      :minutes="minutes"
+      :seconds="seconds"
+    ></donut-timer>
   </div>
 </template>
 
@@ -14,6 +20,13 @@ export default {
     DonutTimer,
     TimeSegmentSelector,
   },
+  data: () => ({
+    hours: 0,
+    minutes: 2,
+    seconds: 4,
+    backgroundColor: '#ffbcbc',
+    foregroundColor: '#ff0000',
+  }),
 };
 </script>
 
