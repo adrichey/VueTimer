@@ -3,8 +3,18 @@
     <svg id="donut" width="100%" height="100%" preserveAspectRatio="xMinYMin meet" :viewBox="donutViewBox">
       <g :transform="gTransform"></g>
       <text id="countdown" text-anchor="middle" :fill="foregroundColor" :x="radius" :style="{ 'font-size': fontSize }">--:--:--</text>
+      <svg id="play-pause" viewBox="0 0 100 100" :width="fontSize" :height="fontSize" :fill="foregroundColor" @click="timerToggle">
+        <rect class="opacity-0" width="100%" height="100%"/>
+        <g v-show="!started">
+          <polygon points="28.036 14.018, 28.036 85.982, 75.982 50, 28.036 14.018"></polygon>
+        </g>
+        <g v-show="started">
+          <rect x="28.036" y="14.018" width="20" height="71.964"/>
+          <rect x="58.036" y="14.018" width="20" height="71.964"/>
+        </g>
+      </svg>
       <svg id="reset" :width="fontSize" :height="fontSize" :fill="foregroundColor" @click="timerReset" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-          <rect class="opacity-0" width="100%" height="100%" />
+          <rect class="opacity-0" width="100%" height="100%"/>
           <g display="none">
               <polygon display="inline" points="85.982,15.043 14.018,15.043 41.006,42.031 41.006,84.957 58.996,72.963 58.996,42.031  "></polygon>
           </g>
@@ -20,9 +30,6 @@
           </g>
       </svg>
     </svg>
-    <div class="timer-controls">
-      <button class="timerToggle" @click="timerToggle">{{ started ? 'Stop Timer' : 'Start Timer' }}</button>
-    </div>
   </div>
 </template>
 
@@ -31,11 +38,9 @@ const d3 = require('d3');
 
 const tau = 2 * Math.PI;
 let interval;
-let svg;
 let g;
 let arc;
 let foreground;
-let reload;
 
 export default {
   name: 'donut-timer',
@@ -118,20 +123,12 @@ export default {
   },
   mounted() {
     // Center the SVG and set its boundaries to fit the window
-    svg = d3.select('svg#donut');
     g = d3.select('svg#donut > g');
 
     // The following must be set during mount as d3.select will not run otherwise
     this.setCountdownY();
-
-    reload = svg.select('#reset')
-      .style('fill', this.foregroundColor)
-      .attr('width', `${this.radius / 5}px`)
-      .attr('height', `${this.radius / 5}px`);
-
-    reload
-      .attr('x', this.radius - (reload.node().getBoundingClientRect().width / 2))
-      .attr('y', this.radius + (reload.node().getBoundingClientRect().height / 1.5));
+    this.setResetCoords();
+    this.setPlayCoords();
 
     // Create the donut chart
     arc = d3.arc()
@@ -156,8 +153,23 @@ export default {
   },
   methods: {
     setCountdownY() {
-      const text = d3.select('text#countdown');
+      const text = d3.select('#countdown');
       text.attr('y', this.radius + (text.node().getBoundingClientRect().height / 4));
+    },
+    setResetCoords() {
+      const reload = d3.select('#reset');
+
+      reload
+        .attr('x', this.radius - (reload.node().getBoundingClientRect().width / 2))
+        .attr('y', this.radius + (reload.node().getBoundingClientRect().height / 1.5));
+    },
+    setPlayCoords() {
+      const text = d3.select('#countdown');
+      const playPause = d3.select('#play-pause');
+
+      playPause
+        .attr('x', this.radius - (playPause.node().getBoundingClientRect().width / 2))
+        .attr('y', this.radius - (playPause.node().getBoundingClientRect().height / 1.5) - text.node().getBoundingClientRect().height);
     },
     // Animation tweening
     arcTween(newAngle) {
@@ -225,11 +237,5 @@ export default {
 
   #countdown {
     font-family: 'Impact';
-  }
-
-  .timer-controls {
-    position: absolute;
-    top: 0;
-    left: 0;
   }
 </style>
