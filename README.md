@@ -1,6 +1,6 @@
-# timer
+# vue-timer
 
-> A Vue.js project
+> A simple timer project to provide a visual countdown for kids. 
 
 ## Build Setup
 
