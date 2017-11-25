@@ -1,8 +1,10 @@
 <template>
   <div id="timer" :style="{ 'background-color': backgroundColor }">
     <svg id="donut" width="100%" height="100%" preserveAspectRatio="xMinYMin meet" :viewBox="donutViewBox">
-      <g :transform="gTransform"></g>
-      <text id="countdown" text-anchor="middle" :fill="foregroundColor" :x="radius" :style="{ 'font-size': fontSize }">--:--:--</text>
+      <g :transform="gTransform">
+        <path id="countdown-path" :fill="foregroundColor" :d="arc"></path>
+      </g>
+      <text id="countdown-text" text-anchor="middle" :fill="foregroundColor" :x="radius" :style="{ 'font-size': fontSize }">--:--:--</text>
       <svg id="play-pause" viewBox="0 0 100 100" :width="fontSize" :height="fontSize" :fill="foregroundColor" @click="timerToggle">
         <rect class="opacity-0" width="100%" height="100%"/>
         <g v-show="!started">
@@ -37,10 +39,8 @@
 const d3 = require('d3');
 
 const tau = 2 * Math.PI;
-let interval;
-let g;
-let arc;
-let foreground;
+const chimes = new Audio('static/wind-chimes-a.wav');
+chimes.loop = false;
 
 export default {
   name: 'donut-timer',
@@ -81,6 +81,9 @@ export default {
   data: () => ({
     timeRemaining: 0,
     started: 0, // 0 is paused, 1 is started
+    interval: null,
+    timerPercentage: 1, // 1 = 100%, 0.50 = 50%, etc.
+    timeFraction: 0, // Fraction to remove from path each tick
   }),
   computed: {
     timeReadable() {
@@ -120,56 +123,54 @@ export default {
     gTransform() {
       return `translate(${this.radius},${this.radius})`;
     },
+    arc() {
+      return d3.arc()
+        .innerRadius(this.radius - (this.radius / 2))
+        .outerRadius(this.radius)
+        .startAngle(0);
+    },
   },
   mounted() {
-    // Center the SVG and set its boundaries to fit the window
-    g = d3.select('svg#donut > g');
-
     // The following must be set during mount as d3.select will not run otherwise
-    this.setCountdownY();
+    this.setCountdownCoords();
     this.setResetCoords();
     this.setPlayCoords();
-
-    // Create the donut chart
-    arc = d3.arc()
-      .innerRadius(this.radius - (this.radius / 2))
-      .outerRadius(this.radius)
-      .startAngle(0);
-
-    // Background - Time remaining
-    g.append('path')
-      .datum({ endAngle: tau })
-      .style('fill', this.foregroundColor)
-      .attr('d', arc);
-
-    // Foreground - Time expired
-    foreground = g.append('path')
-      .datum({ endAngle: 0 * tau })
-      .style('fill', this.backgroundColor)
-      .attr('d', arc);
+    this.setPathEndAngle();
 
     // Begin the timer
     this.timerReset();
   },
   methods: {
-    setCountdownY() {
-      const text = d3.select('#countdown');
+    setCountdownCoords() {
+      const text = d3.select('#countdown-text');
       text.attr('y', this.radius + (text.node().getBoundingClientRect().height / 4));
+
+      return { x: text.attr('x'), y: text.attr('y') };
     },
     setResetCoords() {
       const reload = d3.select('#reset');
 
       reload
-        .attr('x', this.radius - (reload.node().getBoundingClientRect().width / 2))
+        .attr('x', this.radius - reload.node().getBoundingClientRect().width)
         .attr('y', this.radius + (reload.node().getBoundingClientRect().height / 1.5));
+
+      return { x: reload.attr('x'), y: reload.attr('y') };
     },
     setPlayCoords() {
-      const text = d3.select('#countdown');
       const playPause = d3.select('#play-pause');
 
       playPause
-        .attr('x', this.radius - (playPause.node().getBoundingClientRect().width / 2))
-        .attr('y', this.radius - (playPause.node().getBoundingClientRect().height / 1.5) - text.node().getBoundingClientRect().height);
+        .attr('x', this.radius)
+        .attr('y', this.radius + (playPause.node().getBoundingClientRect().height / 1.5));
+
+      return { x: playPause.attr('x'), y: playPause.attr('y') };
+    },
+    setPathEndAngle() {
+      const endAngle = 0 * tau;
+
+      d3.select('#countdown-path').datum({ endAngle });
+
+      return endAngle;
     },
     // Animation tweening
     arcTween(newAngle) {
@@ -179,7 +180,7 @@ export default {
 
         return (t) => {
           data.endAngle = interpolate(t);
-          return arc(data);
+          return this.arc(data);
         };
       };
     },
@@ -188,30 +189,68 @@ export default {
     },
     timerReset() {
       // Timer functionality
-      let timerPercentage = 0.00;
+      this.timerPercentage = 1;
       const minutes = (this.minutes * 60);
       const hours = (this.hours * 60 * 60);
       this.timeRemaining = this.seconds + minutes + hours;
-      const timeFraction = (100 / (this.timeRemaining)) * 0.01;
-      const text = d3.select('text#countdown');
+      this.timeFraction = (100 / (this.timeRemaining)) * 0.01;
+      const text = d3.select('#countdown-text');
+      const path = d3.select('#countdown-path');
 
       text.text(this.timeReadable);
-      foreground.transition()
+      path.transition()
         .duration(1000)
-        .attrTween('d', this.arcTween(timerPercentage * tau));
+        .attrTween('d', this.arcTween(this.timerPercentage * tau));
+
+      chimes.pause();
+      chimes.currentTime = 0;
 
       // Begin timer polling
-      clearInterval(interval);
-      interval = setInterval(() => {
-        if (this.started) {
-          timerPercentage = timerPercentage >= 1 ? 0.00 : timerPercentage + timeFraction;
-          foreground.transition()
-            .duration(750)
-            .attrTween('d', this.arcTween(timerPercentage * tau));
-          this.timeRemaining -= 1;
-          text.text(this.timeReadable);
-        }
-      }, 1000);
+      this.beginCountdownInterval();
+    },
+    beginCountdownInterval() {
+      clearInterval(this.interval);
+      this.interval = setInterval(this.timerTick, 1000);
+    },
+    timerTick() {
+      if (this.timeRemaining <= 0) {
+        this.timerDone();
+        return;
+      }
+
+      if (this.started) {
+        const text = d3.select('#countdown-text');
+        const path = d3.select('#countdown-path');
+
+        this.timerPercentage = this.timerPercentage - this.timeFraction;
+        this.timeRemaining -= 1;
+
+        path.transition()
+          .duration(750)
+          .attrTween('d', this.arcTween(this.timerPercentage * tau));
+
+        text.text(this.timeReadable);
+      }
+    },
+    timerDone() {
+      this.started = false;
+      if (this.hours !== 0 || this.minutes !== 0 || this.seconds !== 0) {
+        chimes.play();
+      }
+    },
+  },
+  watch: {
+    hours() {
+      this.started = false;
+      this.timerReset();
+    },
+    minutes() {
+      this.started = false;
+      this.timerReset();
+    },
+    seconds() {
+      this.started = false;
+      this.timerReset();
     },
   },
 };
@@ -223,19 +262,16 @@ export default {
   }
 
   #timer {
-    height: 100%;
-    width: 100%;
-    display: flex;
     align-items: center;
+    display: flex;
+    font-family: 'Impact';
+    height: 100%;
     justify-content: center;
+    width: 100%;
   }
 
   /* Needed to center the SVGs on the page */
   #timer svg {
     width: auto;
-  }
-
-  #countdown {
-    font-family: 'Impact';
   }
 </style>

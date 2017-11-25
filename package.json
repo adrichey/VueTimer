@@ -1,7 +1,7 @@
 {
   "name": "timer",
   "version": "1.0.0",
-  "description": "A Vue.js project",
+  "description": "A simple timer project to provide a visual countdown for kids.",
   "author": "Alan Richey <adrichey@gmail.com>",
   "private": true,
   "scripts": {
