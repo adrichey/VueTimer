@@ -261,6 +261,14 @@ export default {
     opacity: 0;
   }
 
+  #timer,
+  #countdown-path,
+  #countdown-text,
+  #play-pause,
+  #reset {
+    transition: .3s all;
+  }
+
   #timer {
     align-items: center;
     display: flex;
