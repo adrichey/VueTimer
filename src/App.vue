@@ -9,34 +9,42 @@
       </svg>
       <transition name="slide-fade">
         <div id="settings" v-show="expanded">
-          <span class="time-segment">
+          <div class="time-segment">
+            <span>H</span>
             <select v-model="hours">
               <option v-for="option in timeSegmentOptions" :value="option.value">
                 {{ option.label }}
               </option>
             </select>
-          </span>
-          <span class="time-segment">
+          </div>
+          <div class="time-segment">
+            <span>M</span>
             <select v-model="minutes">
               <option v-for="option in timeSegmentOptions" :value="option.value">
                 {{ option.label }}
               </option>
             </select>
-          </span>
-          <span class="time-segment">
+          </div>
+          <div class="time-segment">
+            <span>S</span>
             <select v-model="seconds">
               <option v-for="option in timeSegmentOptions" :value="option.value">
                 {{ option.label }}
               </option>
             </select>
-          </span>
-          <span class="theme-selector">
+          </div>
+          <div class="theme-selector">
+            <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" x="0px" y="0px" viewBox="0 0 100 100">
+              <g transform="translate(0,-952.36218)">
+                <path d="m 55,959.36217 c -26.7533,0 -39,22 -39,42.00003 0,19 10.7449,43.4935 29,44 6.0945,0 15,-3 18,-29 3,-24.00003 21,-17.00001 21,-34.00003 0,-12 -12,-23 -29,-23 z m 0,9 c 3.866,0 7,3.134 7,7 0,3.866 -3.134,7 -7,7 -3.866,0 -7,-3.134 -7,-7 0,-3.866 3.134,-7 7,-7 z m -19,12 c 3.866,0 7,3.134 7,7 0,3.866 -3.134,7 -7,7 -3.866,0 -7,-3.134 -7,-7 0,-3.866 3.134,-7 7,-7 z m -3.5,24.00003 c 3.5899,0 6.5,2.9101 6.5,6.5 0,3.5898 -2.9101,6.5 -6.5,6.5 -3.5899,0 -6.5,-2.9102 -6.5,-6.5 0,-3.5899 2.9101,-6.5 6.5,-6.5 z m 10.5,19 c 3.3137,0 6,2.6863 6,6 0,3.3137 -2.6863,6 -6,6 -3.3137,0 -6,-2.6863 -6,-6 0,-3.3137 2.6863,-6 6,-6 z" style="color:#000000;enable-background:accumulate;" fill="#000000" stroke="none" marker="none" visibility="visible" display="inline" overflow="visible"></path>
+              </g>
+            </svg>
             <select v-model="theme">
               <option v-for="(option, index) in themeOptions" :value="index">
                 {{ option.label }}
               </option>
             </select>
-          </span>
+          </div>
         </div>
       </transition>
     </nav>
@@ -127,6 +135,7 @@ export default {
   }
 
   #app {
+    font-family: 'Impact';
     height: 100vh;
     width: 100vw;
   }
@@ -178,10 +187,18 @@ export default {
     width: 180px;
   }
 
-  #settings span {
+  #settings div {
     display: block;
-    margin: 5px;
+    margin: 5px 0;
     position: relative;
+  }
+
+  #settings span, #settings svg {
+    float: left;
+    line-height: 15px;
+    margin: 10px 5px 10px 0;
+    text-align: center;
+    width: 15px;
   }
 
   #settings select {
@@ -193,10 +210,10 @@ export default {
     font-size: 16px;
     height: 34px;
     padding: 5px;
-    width: 100%;
+    width: 160px;
   }
 
-  #settings span::after {
+  #settings div::after {
     bottom: 8px;
     content: '\25BC';
     font-size: 12px;
