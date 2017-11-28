@@ -90,16 +90,16 @@ export default {
       return `${this.hoursReadable}:${this.minutesReadable}:${this.secondsReadable}`;
     },
     hoursReadable() {
-      const hrs = Math.floor((this.timeRemaining / 60 / 60));
-      return hrs >= 10 ? hrs : `0${hrs}`;
+      const hrs = Math.floor((this.timeRemaining / 60) / 60);
+      return hrs >= 10 ? `${hrs}` : `0${hrs}`;
     },
     minutesReadable() {
       const min = Math.floor((this.timeRemaining / 60) % 60);
-      return min >= 10 ? min : `0${min}`;
+      return min >= 10 ? `${min}` : `0${min}`;
     },
     secondsReadable() {
       const sec = Math.ceil(this.timeRemaining % 60);
-      return sec >= 10 ? sec : `0${sec}`;
+      return sec >= 10 ? `${sec}` : `0${sec}`;
     },
     windowWidth() {
       return Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
@@ -142,28 +142,26 @@ export default {
   },
   methods: {
     setCountdownCoords() {
-      const text = d3.select('#countdown-text');
-      text.attr('y', this.radius + (text.node().getBoundingClientRect().height / 4));
+      const text = this.$el.querySelector('#countdown-text');
+      text.setAttribute('y', this.radius + (text.getBoundingClientRect().height / 4));
 
-      return { x: text.attr('x'), y: text.attr('y') };
+      return { x: text.getAttribute('x'), y: text.getAttribute('y') };
     },
     setResetCoords() {
-      const reload = d3.select('#reset');
+      const reload = this.$el.querySelector('#reset');
 
-      reload
-        .attr('x', this.radius - reload.node().getBoundingClientRect().width)
-        .attr('y', this.radius + (reload.node().getBoundingClientRect().height / 1.5));
+      reload.setAttribute('x', this.radius - reload.getBoundingClientRect().width);
+      reload.setAttribute('y', this.radius + (reload.getBoundingClientRect().height / 1.5));
 
-      return { x: reload.attr('x'), y: reload.attr('y') };
+      return { x: reload.getAttribute('x'), y: reload.getAttribute('y') };
     },
     setPlayCoords() {
-      const playPause = d3.select('#play-pause');
+      const playPause = this.$el.querySelector('#play-pause');
 
-      playPause
-        .attr('x', this.radius)
-        .attr('y', this.radius + (playPause.node().getBoundingClientRect().height / 1.5));
+      playPause.setAttribute('x', this.radius);
+      playPause.setAttribute('y', this.radius + (playPause.getBoundingClientRect().height / 1.5));
 
-      return { x: playPause.attr('x'), y: playPause.attr('y') };
+      return { x: playPause.getAttribute('x'), y: playPause.getAttribute('y') };
     },
     setPathEndAngle() {
       const endAngle = 0 * tau;
