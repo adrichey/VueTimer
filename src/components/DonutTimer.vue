@@ -39,8 +39,6 @@
 const d3 = require('d3');
 
 const tau = 2 * Math.PI;
-const chimes = new Audio('static/wind-chimes-a.wav');
-chimes.loop = false;
 
 export default {
   name: 'donut-timer',
@@ -80,10 +78,11 @@ export default {
   },
   data: () => ({
     timeRemaining: 0,
-    started: 0, // 0 is paused, 1 is started
+    started: false, // Boolean
     interval: null,
     timerPercentage: 1, // 1 = 100%, 0.50 = 50%, etc.
     timeFraction: 0, // Fraction to remove from path each tick
+    chimes: new Audio('static/wind-chimes-a.wav'),
   }),
   computed: {
     timeReadable() {
@@ -131,6 +130,8 @@ export default {
     },
   },
   mounted() {
+    this.chimes.loop = false;
+
     // The following must be set during mount as d3.select will not run otherwise
     this.setCountdownCoords();
     this.setResetCoords();
@@ -166,7 +167,7 @@ export default {
     setPathEndAngle() {
       const endAngle = 0 * tau;
 
-      d3.select('#countdown-path').datum({ endAngle });
+      d3.select(this.$el.querySelector('#countdown-path')).datum({ endAngle });
 
       return endAngle;
     },
@@ -183,7 +184,7 @@ export default {
       };
     },
     timerToggle() {
-      this.started = this.started ? 0 : 1;
+      this.started = !this.started;
     },
     timerReset() {
       // Timer functionality
@@ -192,16 +193,16 @@ export default {
       const hours = (this.hours * 60 * 60);
       this.timeRemaining = this.seconds + minutes + hours;
       this.timeFraction = (100 / (this.timeRemaining)) * 0.01;
-      const text = d3.select('#countdown-text');
-      const path = d3.select('#countdown-path');
+      const text = d3.select(this.$el.querySelector('#countdown-text'));
+      const path = d3.select(this.$el.querySelector('#countdown-path'));
 
       text.text(this.timeReadable);
       path.transition()
         .duration(1000)
         .attrTween('d', this.arcTween(this.timerPercentage * tau));
 
-      chimes.pause();
-      chimes.currentTime = 0;
+      this.chimes.pause();
+      this.chimes.currentTime = 0;
 
       // Begin timer polling
       this.beginCountdownInterval();
@@ -217,8 +218,8 @@ export default {
       }
 
       if (this.started) {
-        const text = d3.select('#countdown-text');
-        const path = d3.select('#countdown-path');
+        const text = d3.select(this.$el.querySelector('#countdown-text'));
+        const path = d3.select(this.$el.querySelector('#countdown-path'));
 
         this.timerPercentage = this.timerPercentage - this.timeFraction;
         this.timeRemaining -= 1;
@@ -233,7 +234,7 @@ export default {
     timerDone() {
       this.started = false;
       if (this.hours !== 0 || this.minutes !== 0 || this.seconds !== 0) {
-        chimes.play();
+        this.chimes.play();
       }
     },
   },
