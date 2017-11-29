@@ -406,5 +406,76 @@ describe('DonutTimer.vue', () => {
         });
       });
     });
+
+    describe('svgBounds', () => {
+      it('should return windowHeight if it is less than windowWidth', () => {
+        const windowHeight = 500;
+        const windowWidth = 600;
+
+        const vm = new Timer({
+          propsData: {
+            hours: 1,
+            minutes: 5,
+            seconds: 23,
+          },
+          computed: {
+            windowHeight() {
+              return windowHeight;
+            },
+            windowWidth() {
+              return windowWidth;
+            },
+          },
+        }).$mount();
+
+        expect(vm.svgBounds).to.equal(windowHeight);
+      });
+
+      it('should return windowWidth if it is less than windowHeight', () => {
+        const windowHeight = 800;
+        const windowWidth = 400;
+
+        const vm = new Timer({
+          propsData: {
+            hours: 1,
+            minutes: 5,
+            seconds: 23,
+          },
+          computed: {
+            windowHeight() {
+              return windowHeight;
+            },
+            windowWidth() {
+              return windowWidth;
+            },
+          },
+        }).$mount();
+
+        expect(vm.svgBounds).to.equal(windowWidth);
+      });
+
+      it('should return windowHeight if it is equal to windowWidth', () => {
+        const windowHeight = 700;
+        const windowWidth = 700;
+
+        const vm = new Timer({
+          propsData: {
+            hours: 1,
+            minutes: 5,
+            seconds: 23,
+          },
+          computed: {
+            windowHeight() {
+              return windowHeight;
+            },
+            windowWidth() {
+              return windowWidth;
+            },
+          },
+        }).$mount();
+
+        expect(vm.svgBounds).to.equal(windowHeight);
+      });
+    });
   });
 });

@@ -102,10 +102,10 @@ export default {
       return sec >= 10 ? `${sec}` : `0${sec}`;
     },
     windowWidth() {
-      return Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      return Math.max(document.documentElement.clientWidth, window.innerWidth);
     },
     windowHeight() {
-      return Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+      return Math.max(document.documentElement.clientHeight, window.innerHeight);
     },
     svgBounds() {
       return this.windowHeight <= this.windowWidth ? this.windowHeight : this.windowWidth;
