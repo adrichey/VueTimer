@@ -48,18 +48,18 @@
         </div>
       </transition>
     </nav>
-    <donut-timer
+    <countdown-timer
       :background-color="backgroundColor"
       :foreground-color="foregroundColor"
       :hours="hours"
       :minutes="minutes"
       :seconds="seconds"
-    ></donut-timer>
+    ></countdown-timer>
   </div>
 </template>
 
 <script>
-import DonutTimer from './components/DonutTimer';
+import CountdownTimer from './components/CountdownTimer';
 
 const timeSegmentOptions = [];
 for (let i = 0; i < 60; i += 1) {
@@ -90,7 +90,7 @@ const themeOptions = [
   {
     label: 'Green',
     backgroundColor: '#ffffff',
-    foregroundColor: '#4ce873',
+    foregroundColor: '#37ce46',
   },
   {
     label: 'Orange',
@@ -107,7 +107,7 @@ const themeOptions = [
 export default {
   name: 'app',
   components: {
-    DonutTimer,
+    CountdownTimer,
   },
   data: () => ({
     hours: 0,

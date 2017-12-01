@@ -7,10 +7,10 @@
       <text id="countdown-text" text-anchor="middle" :fill="foregroundColor" :x="radius" :style="{ 'font-size': fontSize }">--:--:--</text>
       <svg id="play-pause" viewBox="0 0 100 100" :width="fontSize" :height="fontSize" :fill="foregroundColor" @click="timerToggle">
         <rect class="opacity-0" width="100%" height="100%"/>
-        <g v-show="!started">
+        <g id="play-button" v-show="!started">
           <polygon points="28.036 14.018, 28.036 85.982, 75.982 50, 28.036 14.018"></polygon>
         </g>
-        <g v-show="started">
+        <g id="pause-button" v-show="started">
           <rect x="28.036" y="14.018" width="20" height="71.964"/>
           <rect x="58.036" y="14.018" width="20" height="71.964"/>
         </g>
@@ -41,7 +41,7 @@ const d3 = require('d3');
 const tau = 2 * Math.PI;
 
 export default {
-  name: 'donut-timer',
+  name: 'countdown-timer',
   props: {
     hours: {
       type: Number,

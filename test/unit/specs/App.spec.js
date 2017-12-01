@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import App from '@/App';
+import CountdownTimer from '@/components/CountdownTimer';
 
 Vue.config.devtools = false;
 
@@ -35,7 +36,7 @@ describe('App.vue', () => {
     {
       label: 'Green',
       backgroundColor: '#ffffff',
-      foregroundColor: '#4ce873',
+      foregroundColor: '#37ce46',
     },
     {
       label: 'Orange',
@@ -96,6 +97,10 @@ describe('App.vue', () => {
     expect(vm.$el.querySelector('#timer')).not.to.equal(null);
   });
 
+  it('should use the Timer component', () => {
+    expect(App.components.CountdownTimer).to.equal(CountdownTimer);
+  });
+
   it('should initialize the timer with the correct properties', () => {
     const vm = new Application().$mount();
     const timerProps = vm.$children[0].$props;
@@ -105,5 +110,22 @@ describe('App.vue', () => {
     expect(timerProps.hours).to.equal(0);
     expect(timerProps.minutes).to.equal(10);
     expect(timerProps.seconds).to.equal(0);
+  });
+
+  describe('watchers', () => {
+    it('theme changes should set the background and foreground data', (done) => {
+      const vm = new Application().$mount();
+
+      expect(vm.backgroundColor).to.equal('#ffffff');
+      expect(vm.foregroundColor).to.equal('#000000');
+
+      vm.$set(vm.$data, 'theme', 3);
+
+      vm.$nextTick(() => {
+        expect(vm.backgroundColor).to.equal('#ffffff');
+        expect(vm.foregroundColor).to.equal('#0061ff');
+        done();
+      });
+    });
   });
 });

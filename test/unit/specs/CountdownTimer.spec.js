@@ -5,7 +5,7 @@
  */
 
 import Vue from 'vue';
-import DonutTimer from '@/components/DonutTimer';
+import CountdownTimer from '@/components/CountdownTimer';
 
 Vue.config.devtools = false;
 
@@ -15,8 +15,8 @@ const tau = 2 * Math.PI;
 const timeRemaining = 3923;
 let propsData;
 
-describe('DonutTimer.vue', () => {
-  const Timer = Vue.extend(DonutTimer);
+describe('CountdownTimer.vue', () => {
+  const Component = Vue.extend(CountdownTimer);
 
   beforeEach(() => {
     propsData = {
@@ -27,9 +27,9 @@ describe('DonutTimer.vue', () => {
   });
 
   it('sets the correct default data', () => {
-    expect(typeof DonutTimer.data).to.equal('function');
+    expect(typeof CountdownTimer.data).to.equal('function');
 
-    const defaultData = DonutTimer.data();
+    const defaultData = CountdownTimer.data();
 
     expect(defaultData.timeRemaining).to.equal(0);
     expect(defaultData.started).to.equal(false);
@@ -41,7 +41,7 @@ describe('DonutTimer.vue', () => {
   });
 
   it('should render correctly', () => {
-    const vm = new Timer({
+    const vm = new Component({
       propsData,
     }).$mount();
 
@@ -101,7 +101,7 @@ describe('DonutTimer.vue', () => {
   });
 
   it('should call the correct initialization functions on mount', () => {
-    const vm = new Timer({
+    const vm = new Component({
       propsData,
     });
 
@@ -147,7 +147,7 @@ describe('DonutTimer.vue', () => {
       it('should be required', () => {
         delete propsData.hours;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -157,7 +157,7 @@ describe('DonutTimer.vue', () => {
       it('should be a Number', () => {
         propsData.hours = 'test';
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -167,7 +167,7 @@ describe('DonutTimer.vue', () => {
       it('should be greater than 0', () => {
         propsData.hours = -1;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -177,7 +177,7 @@ describe('DonutTimer.vue', () => {
       it('should be less than 59', () => {
         propsData.hours = 60;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -189,7 +189,7 @@ describe('DonutTimer.vue', () => {
       it('should be required', () => {
         delete propsData.minutes;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -199,7 +199,7 @@ describe('DonutTimer.vue', () => {
       it('should be a Number', () => {
         propsData.minutes = 'test';
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -209,7 +209,7 @@ describe('DonutTimer.vue', () => {
       it('should be greater than 0', () => {
         propsData.minutes = -1;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -219,7 +219,7 @@ describe('DonutTimer.vue', () => {
       it('should be less than 59', () => {
         propsData.minutes = 60;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -231,7 +231,7 @@ describe('DonutTimer.vue', () => {
       it('should be required', () => {
         delete propsData.seconds;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -241,7 +241,7 @@ describe('DonutTimer.vue', () => {
       it('should be a Number', () => {
         propsData.seconds = 'test';
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -251,7 +251,7 @@ describe('DonutTimer.vue', () => {
       it('should be greater than 0', () => {
         propsData.seconds = -1;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -261,7 +261,7 @@ describe('DonutTimer.vue', () => {
       it('should be less than 59', () => {
         propsData.seconds = 60;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -271,7 +271,7 @@ describe('DonutTimer.vue', () => {
 
     describe('foregroundColor property', () => {
       it('should default to #000000', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
         }).$mount();
 
@@ -281,7 +281,7 @@ describe('DonutTimer.vue', () => {
       it('should be a String', () => {
         propsData.foregroundColor = true;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -291,7 +291,7 @@ describe('DonutTimer.vue', () => {
 
     describe('backgroundColor property', () => {
       it('should default to #ffffff', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
         }).$mount();
 
@@ -301,7 +301,7 @@ describe('DonutTimer.vue', () => {
       it('should be a String', () => {
         propsData.backgroundColor = true;
 
-        new Timer({
+        new Component({
           propsData,
         }).$mount();
 
@@ -312,7 +312,7 @@ describe('DonutTimer.vue', () => {
 
   describe('computed properties', () => {
     it('timeReadable should display time in hh:mm:ss format', () => {
-      const vm = new Timer({
+      const vm = new Component({
         propsData,
       }).$mount();
 
@@ -320,7 +320,7 @@ describe('DonutTimer.vue', () => {
     });
 
     it('hoursReadable should pad the hours to two digits with a leading zero for digits 1 through 9', (done) => {
-      const vm = new Timer({
+      const vm = new Component({
         propsData,
       }).$mount();
 
@@ -349,7 +349,7 @@ describe('DonutTimer.vue', () => {
     });
 
     it('minutesReadable should pad the hours to two digits with a leading zero for digits 1 through 9', (done) => {
-      const vm = new Timer({
+      const vm = new Component({
         propsData,
       }).$mount();
 
@@ -378,7 +378,7 @@ describe('DonutTimer.vue', () => {
     });
 
     it('secondsReadable should pad the hours to two digits with a leading zero for digits 1 through 9', (done) => {
-      const vm = new Timer({
+      const vm = new Component({
         propsData,
       }).$mount();
 
@@ -411,7 +411,7 @@ describe('DonutTimer.vue', () => {
         const windowHeight = 500;
         const windowWidth = 600;
 
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
           computed: {
             windowHeight() {
@@ -430,7 +430,7 @@ describe('DonutTimer.vue', () => {
         const windowHeight = 800;
         const windowWidth = 400;
 
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
           computed: {
             windowHeight() {
@@ -449,7 +449,7 @@ describe('DonutTimer.vue', () => {
         const windowHeight = 700;
         const windowWidth = 700;
 
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
           computed: {
             windowHeight() {
@@ -467,7 +467,7 @@ describe('DonutTimer.vue', () => {
 
     describe('radius', () => {
       it('should return svgBounds divided by 2', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
           computed: {
             svgBounds() {
@@ -482,7 +482,7 @@ describe('DonutTimer.vue', () => {
 
     describe('fontSize', () => {
       it('should return radius divided by 5 in pixels', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
           computed: {
             radius() {
@@ -497,7 +497,7 @@ describe('DonutTimer.vue', () => {
 
     describe('donutViewBox', () => {
       it('should return the viewBox attribute for donut timer SVG using svgBounds', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
           computed: {
             svgBounds() {
@@ -512,7 +512,7 @@ describe('DonutTimer.vue', () => {
 
     describe('gTransform', () => {
       it('should return the translation function for the donut timer group transform attribute using radius', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
           computed: {
             radius() {
@@ -527,7 +527,7 @@ describe('DonutTimer.vue', () => {
 
     describe('arc', () => {
       it('should return the arc function used for the countdown path within the donut timer', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
           computed: {
             radius() {
@@ -548,7 +548,7 @@ describe('DonutTimer.vue', () => {
 
   describe('methods', () => {
     it('setCountdownCoords should set and return the x/y coordinates for the countdown text', () => {
-      const vm = new Timer({
+      const vm = new Component({
         propsData,
       }).$mount();
 
@@ -561,7 +561,7 @@ describe('DonutTimer.vue', () => {
     });
 
     it('setResetCoords should set and return the x/y coordinates for the reset SVG', () => {
-      const vm = new Timer({
+      const vm = new Component({
         propsData,
       }).$mount();
 
@@ -575,7 +575,7 @@ describe('DonutTimer.vue', () => {
     });
 
     it('setPlayCoords should set and return the x/y coordinates for the play/pause SVG', () => {
-      const vm = new Timer({
+      const vm = new Component({
         propsData,
       }).$mount();
 
@@ -589,7 +589,7 @@ describe('DonutTimer.vue', () => {
     });
 
     it('setPathEndAngle should set and return the endAngle datum for the donut countdown path', () => {
-      const vm = new Timer({
+      const vm = new Component({
         propsData,
       }).$mount();
 
@@ -601,7 +601,7 @@ describe('DonutTimer.vue', () => {
     // arcTween testing should go here. How the hell are we going to do that??
 
     it('timerToggle should start and stop the timer', () => {
-      const vm = new Timer({
+      const vm = new Component({
         propsData,
       }).$mount();
 
@@ -619,7 +619,7 @@ describe('DonutTimer.vue', () => {
       let vm;
 
       beforeEach(() => {
-        vm = new Timer({
+        vm = new Component({
           propsData,
         }).$mount();
 
@@ -668,7 +668,7 @@ describe('DonutTimer.vue', () => {
     });
 
     it('beginCountdownInterval should clear the previous countdown interval and apply it again', () => {
-      const vm = new Timer({
+      const vm = new Component({
         propsData,
       });
 
@@ -698,7 +698,7 @@ describe('DonutTimer.vue', () => {
       let vm;
 
       beforeEach(() => {
-        vm = new Timer({
+        vm = new Component({
           propsData,
         }).$mount();
 
@@ -795,7 +795,7 @@ describe('DonutTimer.vue', () => {
     // },
     describe('timerDone', () => {
       it('should stop the timer', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData,
         }).$mount();
 
@@ -809,7 +809,7 @@ describe('DonutTimer.vue', () => {
       });
 
       it('should not play the chimes sound if the initial countdown is set to 00:00:00', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData: {
             hours: 0,
             minutes: 0,
@@ -828,7 +828,7 @@ describe('DonutTimer.vue', () => {
       });
 
       it('should play the chimes sound if the initial countdown seconds are set', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData: {
             hours: 0,
             minutes: 0,
@@ -847,7 +847,7 @@ describe('DonutTimer.vue', () => {
       });
 
       it('should play the chimes sound if the initial countdown minutes are set', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData: {
             hours: 0,
             minutes: 1,
@@ -866,7 +866,7 @@ describe('DonutTimer.vue', () => {
       });
 
       it('should play the chimes sound if the initial countdown hours are set', () => {
-        const vm = new Timer({
+        const vm = new Component({
           propsData: {
             hours: 1,
             minutes: 0,
@@ -882,6 +882,80 @@ describe('DonutTimer.vue', () => {
 
         expect(playSpy.called).to.equal(true);
         playSpy.restore();
+      });
+    });
+  });
+
+  describe('watchers', () => {
+    it('hours should stop the timer and reset it', (done) => {
+      const vm = new Component({
+        propsData,
+      }).$mount();
+
+      const timerResetSpy = sinon.spy(vm, 'timerReset');
+
+      vm.$set(vm.$data, 'started', true);
+
+      expect(vm.started).to.equal(true);
+      expect(timerResetSpy.notCalled).to.equal(true);
+
+      vm.$set(vm.$props, 'hours', 3);
+
+      vm.$nextTick(() => {
+        vm.$nextTick(() => {
+          expect(vm.started).to.equal(false);
+          expect(timerResetSpy.called).to.equal(true);
+          timerResetSpy.restore();
+          done();
+        });
+      });
+    });
+
+    it('minutes should stop the timer and reset it', (done) => {
+      const vm = new Component({
+        propsData,
+      }).$mount();
+
+      const timerResetSpy = sinon.spy(vm, 'timerReset');
+
+      vm.$set(vm.$data, 'started', true);
+
+      expect(vm.started).to.equal(true);
+      expect(timerResetSpy.notCalled).to.equal(true);
+
+      vm.$set(vm.$props, 'minutes', 3);
+
+      vm.$nextTick(() => {
+        vm.$nextTick(() => {
+          expect(vm.started).to.equal(false);
+          expect(timerResetSpy.called).to.equal(true);
+          timerResetSpy.restore();
+          done();
+        });
+      });
+    });
+
+    it('seconds should stop the timer and reset it', (done) => {
+      const vm = new Component({
+        propsData,
+      }).$mount();
+
+      const timerResetSpy = sinon.spy(vm, 'timerReset');
+
+      vm.$set(vm.$data, 'started', true);
+
+      expect(vm.started).to.equal(true);
+      expect(timerResetSpy.notCalled).to.equal(true);
+
+      vm.$set(vm.$props, 'seconds', 3);
+
+      vm.$nextTick(() => {
+        vm.$nextTick(() => {
+          expect(vm.started).to.equal(false);
+          expect(timerResetSpy.called).to.equal(true);
+          timerResetSpy.restore();
+          done();
+        });
       });
     });
   });
