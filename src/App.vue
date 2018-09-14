@@ -111,8 +111,8 @@ export default {
   },
   data: () => ({
     hours: 0,
-    minutes: 0,
-    seconds: 5,
+    minutes: 10,
+    seconds: 0,
     theme: 0,
     backgroundColor: themeOptions[0].backgroundColor,
     foregroundColor: themeOptions[0].foregroundColor,
