@@ -7,10 +7,10 @@
       <text id="countdown-text" text-anchor="middle" :fill="foregroundColor" :x="radius" :style="{ 'font-size': fontSize }">--:--:--</text>
       <svg id="play-pause" viewBox="0 0 100 100" :width="fontSize" :height="fontSize" :fill="foregroundColor" @click="timerToggle">
         <rect class="opacity-0" width="100%" height="100%"/>
-        <g id="play-button" v-show="!started">
+        <g v-show="!started">
           <polygon points="28.036 14.018, 28.036 85.982, 75.982 50, 28.036 14.018"></polygon>
         </g>
-        <g id="pause-button" v-show="started">
+        <g v-show="started">
           <rect x="28.036" y="14.018" width="20" height="71.964"/>
           <rect x="58.036" y="14.018" width="20" height="71.964"/>
         </g>
@@ -39,9 +39,11 @@
 const d3 = require('d3');
 
 const tau = 2 * Math.PI;
+const chimes = new Audio('static/wind-chimes-a.wav');
+chimes.loop = false;
 
 export default {
-  name: 'countdown-timer',
+  name: 'donut-timer',
   props: {
     hours: {
       type: Number,
@@ -78,33 +80,32 @@ export default {
   },
   data: () => ({
     timeRemaining: 0,
-    started: false, // Boolean
+    started: 0, // 0 is paused, 1 is started
     interval: null,
     timerPercentage: 1, // 1 = 100%, 0.50 = 50%, etc.
     timeFraction: 0, // Fraction to remove from path each tick
-    chimes: new Audio('static/wind-chimes-a.wav'),
   }),
   computed: {
     timeReadable() {
       return `${this.hoursReadable}:${this.minutesReadable}:${this.secondsReadable}`;
     },
     hoursReadable() {
-      const hrs = Math.floor((this.timeRemaining / 60) / 60);
-      return hrs >= 10 ? `${hrs}` : `0${hrs}`;
+      const hrs = Math.floor((this.timeRemaining / 60 / 60));
+      return hrs >= 10 ? hrs : `0${hrs}`;
     },
     minutesReadable() {
       const min = Math.floor((this.timeRemaining / 60) % 60);
-      return min >= 10 ? `${min}` : `0${min}`;
+      return min >= 10 ? min : `0${min}`;
     },
     secondsReadable() {
       const sec = Math.ceil(this.timeRemaining % 60);
-      return sec >= 10 ? `${sec}` : `0${sec}`;
+      return sec >= 10 ? sec : `0${sec}`;
     },
     windowWidth() {
-      return Math.max(document.documentElement.clientWidth, window.innerWidth);
+      return Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     },
     windowHeight() {
-      return Math.max(document.documentElement.clientHeight, window.innerHeight);
+      return Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
     },
     svgBounds() {
       return this.windowHeight <= this.windowWidth ? this.windowHeight : this.windowWidth;
@@ -130,8 +131,6 @@ export default {
     },
   },
   mounted() {
-    this.chimes.loop = false;
-
     // The following must be set during mount as d3.select will not run otherwise
     this.setCountdownCoords();
     this.setResetCoords();
@@ -143,31 +142,33 @@ export default {
   },
   methods: {
     setCountdownCoords() {
-      const text = this.$el.querySelector('#countdown-text');
-      text.setAttribute('y', this.radius + (text.getBoundingClientRect().height / 4));
+      const text = d3.select('#countdown-text');
+      text.attr('y', this.radius + (text.node().getBoundingClientRect().height / 4));
 
-      return { x: text.getAttribute('x'), y: text.getAttribute('y') };
+      return { x: text.attr('x'), y: text.attr('y') };
     },
     setResetCoords() {
-      const reload = this.$el.querySelector('#reset');
+      const reload = d3.select('#reset');
 
-      reload.setAttribute('x', this.radius - reload.getBoundingClientRect().width);
-      reload.setAttribute('y', this.radius + (reload.getBoundingClientRect().height / 1.5));
+      reload
+        .attr('x', this.radius - reload.node().getBoundingClientRect().width)
+        .attr('y', this.radius + (reload.node().getBoundingClientRect().height / 1.5));
 
-      return { x: reload.getAttribute('x'), y: reload.getAttribute('y') };
+      return { x: reload.attr('x'), y: reload.attr('y') };
     },
     setPlayCoords() {
-      const playPause = this.$el.querySelector('#play-pause');
+      const playPause = d3.select('#play-pause');
 
-      playPause.setAttribute('x', this.radius);
-      playPause.setAttribute('y', this.radius + (playPause.getBoundingClientRect().height / 1.5));
+      playPause
+        .attr('x', this.radius)
+        .attr('y', this.radius + (playPause.node().getBoundingClientRect().height / 1.5));
 
-      return { x: playPause.getAttribute('x'), y: playPause.getAttribute('y') };
+      return { x: playPause.attr('x'), y: playPause.attr('y') };
     },
     setPathEndAngle() {
       const endAngle = 0 * tau;
 
-      d3.select(this.$el.querySelector('#countdown-path')).datum({ endAngle });
+      d3.select('#countdown-path').datum({ endAngle });
 
       return endAngle;
     },
@@ -184,7 +185,7 @@ export default {
       };
     },
     timerToggle() {
-      this.started = !this.started;
+      this.started = this.started ? 0 : 1;
     },
     timerReset() {
       // Timer functionality
@@ -193,16 +194,16 @@ export default {
       const hours = (this.hours * 60 * 60);
       this.timeRemaining = this.seconds + minutes + hours;
       this.timeFraction = (100 / (this.timeRemaining)) * 0.01;
-      const text = d3.select(this.$el.querySelector('#countdown-text'));
-      const path = d3.select(this.$el.querySelector('#countdown-path'));
+      const text = d3.select('#countdown-text');
+      const path = d3.select('#countdown-path');
 
       text.text(this.timeReadable);
       path.transition()
         .duration(1000)
         .attrTween('d', this.arcTween(this.timerPercentage * tau));
 
-      this.chimes.pause();
-      this.chimes.currentTime = 0;
+      chimes.pause();
+      chimes.currentTime = 0;
 
       // Begin timer polling
       this.beginCountdownInterval();
@@ -218,8 +219,8 @@ export default {
       }
 
       if (this.started) {
-        const text = d3.select(this.$el.querySelector('#countdown-text'));
-        const path = d3.select(this.$el.querySelector('#countdown-path'));
+        const text = d3.select('#countdown-text');
+        const path = d3.select('#countdown-path');
 
         this.timerPercentage = this.timerPercentage - this.timeFraction;
         this.timeRemaining -= 1;
@@ -234,7 +235,7 @@ export default {
     timerDone() {
       this.started = false;
       if (this.hours !== 0 || this.minutes !== 0 || this.seconds !== 0) {
-        this.chimes.play();
+        chimes.play();
       }
     },
   },
@@ -258,14 +259,6 @@ export default {
 <style>
   .opacity-0 {
     opacity: 0;
-  }
-
-  #timer,
-  #countdown-path,
-  #countdown-text,
-  #play-pause,
-  #reset {
-    transition: .3s all;
   }
 
   #timer {
