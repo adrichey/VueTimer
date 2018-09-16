@@ -11,18 +11,33 @@ module.exports = function (config) {
     // 1. install corresponding karma launcher
     //    http://karma-runner.github.io/0.13/config/browsers.html
     // 2. add it to the `browsers` array below.
-    browsers: ['ChromeHeadless_1280x720'],
+    browsers: ['Chrome_1280x720', 'ChromeHeadless_1280x720'],
     customLaunchers: {
+      Chrome_1280x720: {
+        base: 'Chrome',
+        flags: ['--window-size=1280,720'],
+      },
       ChromeHeadless_1280x720: {
         base: 'ChromeHeadless',
-        flags: ['--window-size=1280,720']
+        flags: ['--window-size=1280,720'],
       },
     },
     frameworks: ['mocha', 'sinon-chai'],
     reporters: ['spec', 'coverage'],
-    files: ['./index.js'],
+    files: [
+      './index.js',
+      {
+        pattern: './static/wind-chimes-a.wav',
+        watched: false,
+        included: false,
+        served: true,
+      },
+    ],
+    proxies: {
+      '/static/wind-chimes-a.wav': `/absolute/${__dirname}/static/wind-chimes-a.wav`,
+    },
     preprocessors: {
-      './index.js': ['webpack', 'sourcemap']
+      './index.js': ['webpack', 'sourcemap'],
     },
     webpack: webpackConfig,
     webpackMiddleware: {

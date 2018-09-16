@@ -7,10 +7,10 @@
       <text id="countdown-text" text-anchor="middle" :fill="foregroundColor" :x="radius" :style="{ 'font-size': fontSize }">--:--:--</text>
       <svg id="play-pause" viewBox="0 0 100 100" :width="fontSize" :height="fontSize" :fill="foregroundColor" @click="timerToggle">
         <rect class="opacity-0" width="100%" height="100%"/>
-        <g v-show="!started">
+        <g id="play-button" v-show="!started">
           <polygon points="28.036 14.018, 28.036 85.982, 75.982 50, 28.036 14.018"></polygon>
         </g>
-        <g v-show="started">
+        <g id="pause-button" v-show="started">
           <rect x="28.036" y="14.018" width="20" height="71.964"/>
           <rect x="58.036" y="14.018" width="20" height="71.964"/>
         </g>
@@ -39,11 +39,9 @@
 const d3 = require('d3');
 
 const tau = 2 * Math.PI;
-const chimes = new Audio('static/wind-chimes-a.wav');
-chimes.loop = false;
 
 export default {
-  name: 'donut-timer',
+  name: 'countdown-timer',
   props: {
     hours: {
       type: Number,
@@ -80,10 +78,11 @@ export default {
   },
   data: () => ({
     timeRemaining: 0,
-    started: 0, // 0 is paused, 1 is started
+    started: false, // Boolean
     interval: null,
     timerPercentage: 1, // 1 = 100%, 0.50 = 50%, etc.
     timeFraction: 0, // Fraction to remove from path each tick
+    chimes: new Audio('/static/wind-chimes-a.wav'),
   }),
   computed: {
     timeReadable() {
@@ -91,15 +90,15 @@ export default {
     },
     hoursReadable() {
       const hrs = Math.floor((this.timeRemaining / 60 / 60));
-      return hrs >= 10 ? hrs : `0${hrs}`;
+      return hrs >= 10 ? `${hrs}` : `0${hrs}`;
     },
     minutesReadable() {
       const min = Math.floor((this.timeRemaining / 60) % 60);
-      return min >= 10 ? min : `0${min}`;
+      return min >= 10 ? `${min}` : `0${min}`;
     },
     secondsReadable() {
       const sec = Math.ceil(this.timeRemaining % 60);
-      return sec >= 10 ? sec : `0${sec}`;
+      return sec >= 10 ? `${sec}` : `0${sec}`;
     },
     windowWidth() {
       return Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
@@ -139,6 +138,9 @@ export default {
 
     // Begin the timer
     this.timerReset();
+  },
+  beforeDestroy() {
+    clearInterval(this.interval);
   },
   methods: {
     setCountdownCoords() {
@@ -185,7 +187,7 @@ export default {
       };
     },
     timerToggle() {
-      this.started = this.started ? 0 : 1;
+      this.started = !this.started;
     },
     timerReset() {
       // Timer functionality
@@ -202,8 +204,8 @@ export default {
         .duration(1000)
         .attrTween('d', this.arcTween(this.timerPercentage * tau));
 
-      chimes.pause();
-      chimes.currentTime = 0;
+      this.chimes.pause();
+      this.chimes.currentTime = 0;
 
       // Begin timer polling
       this.beginCountdownInterval();
@@ -235,7 +237,7 @@ export default {
     timerDone() {
       this.started = false;
       if (this.hours !== 0 || this.minutes !== 0 || this.seconds !== 0) {
-        chimes.play();
+        this.chimes.play();
       }
     },
   },

@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import CountdownTimer from './components/CountdownTimer';
+import CountdownTimer from '@/components/CountdownTimer';
 
 const timeSegmentOptions = [];
 for (let i = 0; i < 60; i += 1) {

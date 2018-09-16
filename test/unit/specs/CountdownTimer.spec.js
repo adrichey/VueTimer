@@ -5,28 +5,35 @@
  */
 
 import { mount } from '@vue/test-utils';
+import merge from 'lodash/merge';
 
 import CountdownTimer from '@/components/CountdownTimer';
 
 const d3 = require('d3');
 
-const tau = 2 * Math.PI;
-const timeRemaining = 3923;
-let propsData;
-let wrapper;
-
 describe('CountdownTimer.vue', () => {
-  beforeEach(() => {
-    propsData = {
-      hours: 1,
-      minutes: 5,
-      seconds: 23,
+  const tau = 2 * Math.PI;
+  const timeRemaining = 3923;
+
+  let wrapper;
+
+  function initializeWrapper(options) {
+    const defaultOptions = {
+      propsData: {
+        hours: 1,
+        minutes: 5,
+        seconds: 23,
+      },
+      attachToDocument: true,
     };
 
-    wrapper = mount(CountdownTimer, {
-      propsData,
-      attachToDocument: true,
-    });
+    const mergedOptions = merge({}, defaultOptions, options);
+
+    return mount(CountdownTimer, mergedOptions);
+  }
+
+  beforeEach(() => {
+    wrapper = initializeWrapper();
   });
 
   afterEach(() => {
@@ -44,26 +51,26 @@ describe('CountdownTimer.vue', () => {
     expect(defaultData.timerPercentage).to.equal(1);
     expect(defaultData.timeFraction).to.equal(0);
     expect(defaultData.chimes instanceof Audio).to.equal(true);
-    expect(defaultData.chimes.getAttribute('src')).to.equal('static/wind-chimes-a.wav');
+    expect(defaultData.chimes.getAttribute('src')).to.equal('/static/wind-chimes-a.wav');
   });
 
-  it('should render correctly', () => {
+  it('renders correctly', () => {
     const donut = wrapper.find('#timer > #donut');
 
-    expect(donut.exists()).to.be(true);
+    expect(donut.exists()).to.equal(true);
     expect(donut.attributes('width')).to.equal('100%');
     expect(donut.attributes('height')).to.equal('100%');
     expect(donut.attributes('preserveAspectRatio')).to.equal('xMinYMin meet');
 
     const path = donut.find('g > #countdown-path');
 
-    expect(path.exists()).to.be(true);
+    expect(path.exists()).to.equal(true);
     expect(path.attributes('fill')).to.equal('#000000');
     expect(path.attributes('d')).to.equal(`${wrapper.vm.arc}`);
 
     const text = donut.find('#countdown-text');
 
-    expect(text.exists()).to.be(true);
+    expect(text.exists()).to.equal(true);
     expect(text.attributes('text-anchor')).to.equal('middle');
     expect(text.attributes('fill')).to.equal('#000000');
     expect(text.attributes('x')).to.equal(`${wrapper.vm.radius}`);
@@ -74,7 +81,7 @@ describe('CountdownTimer.vue', () => {
     const playPauseRect = playPause.find('rect.opacity-0');
     const playPauseGroups = playPause.findAll('g');
 
-    expect(playPause.exists()).to.be(true);
+    expect(playPause.exists()).to.equal(true);
     expect(playPause.attributes('viewBox')).to.equal('0 0 100 100');
     expect(playPause.attributes('width')).to.equal('72px');
     expect(playPause.attributes('height')).to.equal('72px');
@@ -82,14 +89,14 @@ describe('CountdownTimer.vue', () => {
     expect(playPauseRect.attributes('width')).to.equal('100%');
     expect(playPauseRect.attributes('height')).to.equal('100%');
     expect(playPauseGroups.length).to.equal(2);
-    expect(playPauseGroups.at(0).find('polygon').exists()).to.be(true);
+    expect(playPauseGroups.at(0).find('polygon').exists()).to.equal(true);
     expect(playPauseGroups.at(1).findAll('rect').length).to.equal(2);
 
     const reset = donut.find('#reset');
     const resetRect = reset.find('rect.opacity-0');
     const resetGroups = reset.findAll('g');
 
-    expect(reset.exists()).to.be(true);
+    expect(reset.exists()).to.equal(true);
     expect(reset.attributes('viewBox')).to.equal('0 0 100 100');
     expect(reset.attributes('width')).to.equal('72px');
     expect(reset.attributes('height')).to.equal('72px');
@@ -97,336 +104,189 @@ describe('CountdownTimer.vue', () => {
     expect(resetRect.attributes('width')).to.equal('100%');
     expect(resetRect.attributes('height')).to.equal('100%');
     expect(resetGroups.length).to.equal(4);
-    expect(resetGroups.at(0).find('polygon').exists()).to.be(true);
-    expect(resetGroups.at(1).find('path').exists()).to.be(true);
+    expect(resetGroups.at(0).find('polygon').exists()).to.equal(true);
+    expect(resetGroups.at(1).find('path').exists()).to.equal(true);
     expect(resetGroups.at(2).findAll('path').length).to.equal(2);
-    expect(resetGroups.at(3).find('polygon').exists()).to.be(true);
+    expect(resetGroups.at(3).find('polygon').exists()).to.equal(true);
   });
 
-  it('should call the correct initialization functions on mount', () => {
+  it('calls the correct initialization functions on mount', () => {
     wrapper.destroy();
 
-    wrapper = mount(CountdownTimer, {
-      propsData,
-      attachToDocument: true,
+    const setCountdownCoordsStub = sinon.stub();
+    const setResetCoordsStub = sinon.stub();
+    const setPlayCoordsStub = sinon.stub();
+    const setPathEndAngleStub = sinon.stub();
+    const timerResetStub = sinon.stub();
+
+    wrapper = initializeWrapper({
       methods: {
-        setCountdownCoords: sinon.spy(),
-        setResetCoords: sinon.spy(),
-        setPlayCoords: sinon.spy(),
-        setPathEndAngle: sinon.spy(),
-        timerReset: sinon.spy(),
+        setCountdownCoords: setCountdownCoordsStub,
+        setResetCoords: setResetCoordsStub,
+        setPlayCoords: setPlayCoordsStub,
+        setPathEndAngle: setPathEndAngleStub,
+        timerReset: timerResetStub,
       },
     });
 
-    expect(wrapper.vm.methods.setCountdownCoords.calledOnce).to.equal(true);
-    expect(wrapper.vm.methods.setResetCoords.calledOnce).to.equal(true);
-    expect(wrapper.vm.methods.setPlayCoords.calledOnce).to.equal(true);
-    expect(wrapper.vm.methods.setPathEndAngle.calledOnce).to.equal(true);
-    expect(wrapper.vm.methods.timerReset.calledOnce).to.equal(true);
+    expect(setCountdownCoordsStub.calledOnce).to.equal(true);
+    expect(setResetCoordsStub.calledOnce).to.equal(true);
+    expect(setPlayCoordsStub.calledOnce).to.equal(true);
+    expect(setPathEndAngleStub.calledOnce).to.equal(true);
+    expect(timerResetStub.calledOnce).to.equal(true);
   });
 
   describe('props', () => {
-    let consoleSpy;
-
-    beforeEach(() => {
-      consoleSpy = sinon.spy(console, 'error');
-    });
-
-    afterEach(() => {
-      consoleSpy.restore();
-    });
-
     describe('hours property', () => {
-      it('should be required', () => {
-        delete propsData.hours;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Missing required prop: "hours"')).to.not.equal(-1);
+      it('is required', () => {
+        expect(CountdownTimer.props.hours.required).to.equal(true);
       });
 
-      it('should be a Number', () => {
-        propsData.hours = 'test';
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: type check failed for prop "hours". Expected Number, got String.')).to.not.equal(-1);
+      it('is a Number', () => {
+        expect(CountdownTimer.props.hours.type).to.equal(Number);
       });
 
-      it('should be greater than 0', () => {
-        propsData.hours = -1;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: custom validator check failed for prop "hours"')).to.not.equal(-1);
+      it('is greater than 0', () => {
+        expect(CountdownTimer.props.hours.validator(-1)).to.equal(false);
       });
 
-      it('should be less than 59', () => {
-        propsData.hours = 60;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: custom validator check failed for prop "hours"')).to.not.equal(-1);
+      it('is less than 59', () => {
+        expect(CountdownTimer.props.hours.validator(60)).to.equal(false);
       });
     });
 
     describe('minutes property', () => {
-      it('should be required', () => {
-        delete propsData.minutes;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Missing required prop: "minutes"')).to.not.equal(-1);
+      it('is required', () => {
+        expect(CountdownTimer.props.minutes.required).to.equal(true);
       });
 
-      it('should be a Number', () => {
-        propsData.minutes = 'test';
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: type check failed for prop "minutes". Expected Number, got String.')).to.not.equal(-1);
+      it('is a Number', () => {
+        expect(CountdownTimer.props.minutes.type).to.equal(Number);
       });
 
-      it('should be greater than 0', () => {
-        propsData.minutes = -1;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: custom validator check failed for prop "minutes"')).to.not.equal(-1);
+      it('is greater than 0', () => {
+        expect(CountdownTimer.props.minutes.validator(-1)).to.equal(false);
       });
 
-      it('should be less than 59', () => {
-        propsData.minutes = 60;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: custom validator check failed for prop "minutes"')).to.not.equal(-1);
+      it('is less than 59', () => {
+        expect(CountdownTimer.props.minutes.validator(60)).to.equal(false);
       });
     });
 
     describe('seconds property', () => {
-      it('should be required', () => {
-        delete propsData.seconds;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Missing required prop: "seconds"')).to.not.equal(-1);
+      it('is required', () => {
+        expect(CountdownTimer.props.seconds.required).to.equal(true);
       });
 
-      it('should be a Number', () => {
-        propsData.seconds = 'test';
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: type check failed for prop "seconds". Expected Number, got String.')).to.not.equal(-1);
+      it('is a Number', () => {
+        expect(CountdownTimer.props.seconds.type).to.equal(Number);
       });
 
-      it('should be greater than 0', () => {
-        propsData.seconds = -1;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: custom validator check failed for prop "seconds"')).to.not.equal(-1);
+      it('is greater than 0', () => {
+        expect(CountdownTimer.props.seconds.validator(-1)).to.equal(false);
       });
 
-      it('should be less than 59', () => {
-        propsData.seconds = 60;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: custom validator check failed for prop "seconds"')).to.not.equal(-1);
+      it('is less than 59', () => {
+        expect(CountdownTimer.props.seconds.validator(60)).to.equal(false);
       });
     });
 
     describe('foregroundColor property', () => {
-      it('should default to #000000', () => {
-        expect(wrapper.vm.foregroundColor).to.equal('#000000');
+      it('defaults to #000000', () => {
+        expect(CountdownTimer.props.foregroundColor.default).to.equal('#000000');
       });
 
-      it('should be a String', () => {
-        propsData.foregroundColor = true;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: type check failed for prop "foregroundColor". Expected String, got Boolean.')).to.not.equal(-1);
+      it('is a String', () => {
+        expect(CountdownTimer.props.foregroundColor.type).to.equal(String);
       });
     });
 
     describe('backgroundColor property', () => {
-      it('should default to #ffffff', () => {
-        expect(wrapper.vm.backgroundColor).to.equal('#ffffff');
+      it('defaults to #ffffff', () => {
+        expect(CountdownTimer.props.backgroundColor.default).to.equal('#ffffff');
       });
 
-      it('should be a String', () => {
-        propsData.backgroundColor = true;
-
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-        });
-
-        expect(consoleSpy.lastCall.args[0].indexOf('Invalid prop: type check failed for prop "backgroundColor". Expected String, got Boolean.')).to.not.equal(-1);
+      it('is a String', () => {
+        expect(CountdownTimer.props.backgroundColor.type).to.equal(String);
       });
     });
   });
 
   describe('computed properties', () => {
-    it('timeReadable should display time in hh:mm:ss format', () => {
-      expect(wrapper.vm.timeReadable).to.equal('01:05:23');
+    describe('timeReadable', () => {
+      it('displays time in hh:mm:ss format', () => {
+        expect(wrapper.vm.timeReadable).to.equal('01:05:23');
+      });
     });
 
-    it('hoursReadable should pad the hours to two digits with a leading zero for digits 1 through 9', (done) => {
-      expect(wrapper.vm.hoursReadable).to.equal('01');
+    describe('hoursReadable', () => {
+      it('pads the hours to two digits with a leading zero for digits 1 through 9', () => {
+        wrapper.setProps({ hours: 7 });
 
-      wrapper.setProps({ hours: 7 });
-      wrapper.vm.$nextTick(() => {
         expect(wrapper.vm.hoursReadable).to.equal('07');
 
         wrapper.setProps({ hours: 9 });
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.hoursReadable).to.equal('09');
 
-          wrapper.setProps({ hours: 24 });
-          wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.hoursReadable).to.equal('24');
+        expect(wrapper.vm.hoursReadable).to.equal('09');
 
-            wrapper.setProps({ hours: 48 });
-            wrapper.vm.$nextTick(() => {
-              expect(wrapper.vm.hoursReadable).to.equal('48');
-              done();
-            });
-          });
-        });
+        wrapper.setProps({ hours: 24 });
+
+        expect(wrapper.vm.hoursReadable).to.equal('24');
+
+        wrapper.setProps({ hours: 48 });
+
+        expect(wrapper.vm.hoursReadable).to.equal('48');
       });
     });
 
-    it('minutesReadable should pad the hours to two digits with a leading zero for digits 1 through 9', (done) => {
-      expect(wrapper.vm.minutesReadable).to.equal('05');
+    describe('minutesReadable', () => {
+      it('pads the minutes to two digits with a leading zero for digits 1 through 9', () => {
+        wrapper.setProps({ minutes: 7 });
 
-      wrapper.setProps({ minutes: 7 });
-      wrapper.vm.$nextTick(() => {
         expect(wrapper.vm.minutesReadable).to.equal('07');
 
         wrapper.setProps({ minutes: 9 });
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.minutesReadable).to.equal('09');
 
-          wrapper.setProps({ minutes: 24 });
-          wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.minutesReadable).to.equal('24');
+        expect(wrapper.vm.minutesReadable).to.equal('09');
 
-            wrapper.setProps({ minutes: 48 });
-            wrapper.vm.$nextTick(() => {
-              expect(wrapper.vm.minutesReadable).to.equal('48');
-              done();
-            });
-          });
-        });
+        wrapper.setProps({ minutes: 24 });
+
+        expect(wrapper.vm.minutesReadable).to.equal('24');
+
+        wrapper.setProps({ minutes: 48 });
+
+        expect(wrapper.vm.minutesReadable).to.equal('48');
       });
     });
 
-    it('secondsReadable should pad the hours to two digits with a leading zero for digits 1 through 9', (done) => {
-      expect(wrapper.vm.secondsReadable).to.equal('23');
+    describe('secondsReadable', () => {
+      it('pads the seconds to two digits with a leading zero for digits 1 through 9', () => {
+        wrapper.setProps({ seconds: 7 });
 
-      wrapper.setProps({ seconds: 7 });
-      wrapper.vm.$nextTick(() => {
         expect(wrapper.vm.secondsReadable).to.equal('07');
 
         wrapper.setProps({ seconds: 9 });
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.secondsReadable).to.equal('09');
 
-          wrapper.setProps({ seconds: 24 });
-          wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.secondsReadable).to.equal('24');
+        expect(wrapper.vm.secondsReadable).to.equal('09');
 
-            wrapper.setProps({ seconds: 48 });
-            wrapper.vm.$nextTick(() => {
-              expect(wrapper.vm.secondsReadable).to.equal('48');
-              done();
-            });
-          });
-        });
+        wrapper.setProps({ seconds: 24 });
+
+        expect(wrapper.vm.secondsReadable).to.equal('24');
+
+        wrapper.setProps({ seconds: 48 });
+
+        expect(wrapper.vm.secondsReadable).to.equal('48');
       });
     });
 
     describe('svgBounds', () => {
-      it('should return windowHeight if it is less than windowWidth', () => {
+      it('returns windowHeight if it is less than windowWidth', () => {
         const windowHeight = 500;
         const windowWidth = 600;
 
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
+        wrapper = initializeWrapper({
           computed: {
             windowHeight() {
               return windowHeight;
@@ -440,15 +300,13 @@ describe('CountdownTimer.vue', () => {
         expect(wrapper.vm.svgBounds).to.equal(windowHeight);
       });
 
-      it('should return windowWidth if it is less than windowHeight', () => {
+      it('returns windowWidth if it is less than windowHeight', () => {
         const windowHeight = 800;
         const windowWidth = 400;
 
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
+        wrapper = initializeWrapper({
           computed: {
             windowHeight() {
               return windowHeight;
@@ -462,15 +320,13 @@ describe('CountdownTimer.vue', () => {
         expect(wrapper.vm.svgBounds).to.equal(windowWidth);
       });
 
-      it('should return windowHeight if it is equal to windowWidth', () => {
+      it('returns windowHeight if it is equal to windowWidth', () => {
         const windowHeight = 700;
         const windowWidth = 700;
 
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
+        wrapper = initializeWrapper({
           computed: {
             windowHeight() {
               return windowHeight;
@@ -486,12 +342,10 @@ describe('CountdownTimer.vue', () => {
     });
 
     describe('radius', () => {
-      it('should return svgBounds divided by 2', () => {
+      it('returns svgBounds divided by 2', () => {
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
+        wrapper = initializeWrapper({
           computed: {
             svgBounds() {
               return 730;
@@ -504,12 +358,10 @@ describe('CountdownTimer.vue', () => {
     });
 
     describe('fontSize', () => {
-      it('should return radius divided by 5 in pixels', () => {
+      it('returns radius divided by 5 in pixels', () => {
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
+        wrapper = initializeWrapper({
           computed: {
             radius() {
               return 680;
@@ -522,12 +374,10 @@ describe('CountdownTimer.vue', () => {
     });
 
     describe('donutViewBox', () => {
-      it('should return the viewBox attribute for donut timer SVG using svgBounds', () => {
+      it('returns the viewBox attribute for donut timer SVG using svgBounds', () => {
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
+        wrapper = initializeWrapper({
           computed: {
             svgBounds() {
               return 730;
@@ -540,12 +390,10 @@ describe('CountdownTimer.vue', () => {
     });
 
     describe('gTransform', () => {
-      it('should return the translation function for the donut timer group transform attribute using radius', () => {
+      it('returns the translation function for the donut timer group transform attribute using radius', () => {
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
+        wrapper = initializeWrapper({
           computed: {
             radius() {
               return 360;
@@ -558,12 +406,10 @@ describe('CountdownTimer.vue', () => {
     });
 
     describe('arc', () => {
-      it('should return the arc function used for the countdown path within the donut timer', () => {
+      it('returns the arc function used for the countdown path within the donut timer', () => {
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
+        wrapper = initializeWrapper({
           computed: {
             radius() {
               return 360;
@@ -582,82 +428,78 @@ describe('CountdownTimer.vue', () => {
   });
 
   describe('methods', () => {
-    it('setCountdownCoords should set and return the x/y coordinates for the countdown text', () => {
-      const coordinates = wrapper.vm.setCountdownCoords();
-      const countdownOffset = wrapper.find('#countdown-text').element.getBoundingClientRect().height / 4;
-      const expectedY = wrapper.vm.radius + countdownOffset;
+    describe('setCountdownCoords', () => {
+      it('sets and returns the x/y coordinates for the countdown text', () => {
+        const coordinates = wrapper.vm.setCountdownCoords();
+        const countdownOffset = wrapper.vm.$el.querySelector('#countdown-text').getBoundingClientRect().height / 4;
+        const expectedY = wrapper.vm.radius + countdownOffset;
 
-      expect(coordinates.x).to.equal('360');
-      expect(coordinates.y).to.equal(`${expectedY}`);
+        expect(coordinates.x).to.equal('360');
+        expect(coordinates.y).to.equal(`${expectedY}`);
+      });
     });
 
-    it('setResetCoords should set and return the x/y coordinates for the reset SVG', () => {
-      const coordinates = wrapper.vm.setResetCoords();
-      const reload = wrapper.find('#countdown-text').element;
-      const expectedX = wrapper.vm.radius - reload.getBoundingClientRect().width;
-      const expectedY = wrapper.vm.radius + (reload.getBoundingClientRect().height / 1.5);
+    describe('setResetCoords', () => {
+      it('sets and returns the x/y coordinates for the reset SVG', () => {
+        const coordinates = wrapper.vm.setResetCoords();
+        const reload = wrapper.vm.$el.querySelector('#reset');
+        const expectedX = wrapper.vm.radius - reload.getBoundingClientRect().width;
+        const expectedY = wrapper.vm.radius + (reload.getBoundingClientRect().height / 1.5);
 
-      expect(coordinates.x).to.equal(`${expectedX}`);
-      expect(coordinates.y).to.equal(`${expectedY}`);
+        expect(coordinates.x).to.equal(`${expectedX}`);
+        expect(coordinates.y).to.equal(`${expectedY}`);
+      });
     });
 
-    it('setPlayCoords should set and return the x/y coordinates for the play/pause SVG', () => {
-      const coordinates = wrapper.vm.setPlayCoords();
-      const playPause = wrapper.find('#play-pause').element;
-      const expectedX = wrapper.vm.radius;
-      const expectedY = wrapper.vm.radius + (playPause.getBoundingClientRect().height / 1.5);
+    describe('setPlayCoords', () => {
+      it('sets and returns the x/y coordinates for the play/pause SVG', () => {
+        const coordinates = wrapper.vm.setPlayCoords();
+        const playPause = wrapper.vm.$el.querySelector('#play-pause');
+        const expectedX = wrapper.vm.radius;
+        const expectedY = wrapper.vm.radius + (playPause.getBoundingClientRect().height / 1.5);
 
-      expect(coordinates.x).to.equal(`${expectedX}`);
-      expect(coordinates.y).to.equal(`${expectedY}`);
+        expect(coordinates.x).to.equal(`${expectedX}`);
+        expect(coordinates.y).to.equal(`${expectedY}`);
+      });
     });
 
-    it('setPathEndAngle should set and return the endAngle datum for the donut countdown path', () => {
-      const endAngle = wrapper.vm.setPathEndAngle();
+    describe('setPathEndAngle', () => {
+      it('sets and returns the endAngle datum for the donut countdown path', () => {
+        const endAngle = wrapper.vm.setPathEndAngle();
 
-      expect(endAngle).to.equal(0 * tau);
+        expect(endAngle).to.equal(0 * tau);
+      });
     });
 
-    // arcTween testing should go here. How the hell are we going to do that??
+    describe('timerToggle', () => {
+      it('starts and stops the timer', () => {
+        expect(wrapper.vm.started).to.equal(false);
 
-    it('timerToggle should start and stop the timer', () => {
-      expect(wrapper.vm.started).to.equal(false);
+        wrapper.vm.timerToggle();
+        expect(wrapper.vm.started).to.equal(true);
 
-      wrapper.vm.timerToggle();
-      expect(wrapper.vm.started).to.equal(true);
-
-      wrapper.vm.timerToggle();
-      expect(wrapper.vm.started).to.equal(false);
+        wrapper.vm.timerToggle();
+        expect(wrapper.vm.started).to.equal(false);
+      });
     });
 
     describe('timerReset', () => {
-      beforeEach(() => {
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-          methods: {
-            beginCountdownInterval: sinon.spy(),
-          },
-        });
-      });
-
-      it('should set the timeRemaining', () => {
+      it('sets the timeRemaining', () => {
         wrapper.vm.timerReset();
         expect(wrapper.vm.timeRemaining).to.equal(timeRemaining);
       });
 
-      it('should set the timeFraction', () => {
+      it('sets the timeFraction', () => {
         wrapper.vm.timerReset();
         expect(wrapper.vm.timeFraction).to.equal((100 / timeRemaining) * 0.01);
       });
 
-      it('should set the countdown text', () => {
+      it('sets the countdown text', () => {
         wrapper.vm.timerReset();
         expect(wrapper.find('#countdown-text').text()).to.equal('01:05:23');
       });
 
-      it('should reset the chimes (done nofication)', () => {
+      it('resets the chimes (done nofication)', () => {
         const pauseSpy = sinon.spy(wrapper.vm.chimes, 'pause');
 
         expect(pauseSpy.notCalled).to.equal(true);
@@ -668,44 +510,32 @@ describe('CountdownTimer.vue', () => {
         expect(wrapper.vm.chimes.currentTime).to.equal(0);
       });
 
-      it('should begin the countdown interval', () => {
-        expect(wrapper.vm.beginCountdownInterval.notCalled).to.equal(true);
+      it('begins the countdown interval', () => {
+        const beginCountdownIntervalSpy = sinon.spy(wrapper.vm, 'beginCountdownInterval');
+
+        expect(beginCountdownIntervalSpy.notCalled).to.equal(true);
 
         wrapper.vm.timerReset();
 
-        expect(wrapper.vm.beginCountdownInterval.calledOnce).to.equal(true);
+        expect(beginCountdownIntervalSpy.calledOnce).to.equal(true);
       });
     });
 
-    it('beginCountdownInterval should clear the previous countdown interval and apply it again', () => {
-      expect(wrapper.vm.interval).to.equal(null);
+    describe('beginCountdownInterval', () => {
+      it('clears the previous countdown interval and applies it again', () => {
+        const interval1 = wrapper.vm.interval;
+        expect(interval1).not.to.equal(null);
 
-      wrapper.vm.beginCountdownInterval();
+        wrapper.vm.beginCountdownInterval();
 
-      const interval1 = wrapper.vm.interval;
-      expect(interval1).not.to.equal(null);
-
-      wrapper.vm.beginCountdownInterval();
-
-      const interval2 = wrapper.vm.interval;
-      expect(interval2).not.to.equal(null);
-      expect(interval2).not.to.equal(interval1);
+        const interval2 = wrapper.vm.interval;
+        expect(interval2).not.to.equal(null);
+        expect(interval2).not.to.equal(interval1);
+      });
     });
 
     describe('timerTick', () => {
-      beforeEach(() => {
-        wrapper.destroy();
-
-        wrapper = mount(CountdownTimer, {
-          propsData,
-          attachToDocument: true,
-          methods: {
-            beginCountdownInterval: sinon.spy(),
-          },
-        });
-      });
-
-      it('should call timerDone if the time has run out', () => {
+      it('calls timerDone if the time has run out', () => {
         wrapper.setData({ timeRemaining: 0 });
 
         const timerDoneSpy = sinon.spy(wrapper.vm, 'timerDone');
@@ -718,7 +548,7 @@ describe('CountdownTimer.vue', () => {
         timerDoneSpy.restore();
       });
 
-      it('should not call timerDone if the time has not run out', () => {
+      it('does not call timerDone if the time has not run out', () => {
         const timerDoneSpy = sinon.spy(wrapper.vm, 'timerDone');
 
         expect(timerDoneSpy.notCalled).to.equal(true);
@@ -729,7 +559,7 @@ describe('CountdownTimer.vue', () => {
         timerDoneSpy.restore();
       });
 
-      it('should update the timePercentage and timeRemaining if the timer has started and time has not run out', () => {
+      it('updates the timePercentage and timeRemaining if the timer has started and time has not run out', () => {
         const timeFraction = wrapper.vm.timeFraction;
         const originalTimerPercentage = wrapper.vm.timerPercentage;
         const originalTimeRemaining = wrapper.vm.timeRemaining;
@@ -742,7 +572,7 @@ describe('CountdownTimer.vue', () => {
         expect(wrapper.vm.timeRemaining).to.equal(originalTimeRemaining - 1);
       });
 
-      it('should not update the timePercentage and timeRemaining if the timer has not been started', () => {
+      it('does not update the timePercentage and timeRemaining if the timer has not been started', () => {
         const originalTimerPercentage = wrapper.vm.timerPercentage;
         const originalTimeRemaining = wrapper.vm.timeRemaining;
 
@@ -754,7 +584,7 @@ describe('CountdownTimer.vue', () => {
         expect(wrapper.vm.timeRemaining).to.equal(originalTimeRemaining);
       });
 
-      it('should update the countdown text if the timer has started and time has not run out', () => {
+      it('updates the countdown text if the timer has started and time has not run out', () => {
         const text = wrapper.find('#countdown-text');
 
         wrapper.setData({ started: true });
@@ -768,7 +598,7 @@ describe('CountdownTimer.vue', () => {
         expect(text.text()).to.equal('01:05:21');
       });
 
-      it('should not update the countdown text if the timer has not been started', () => {
+      it('does not update the countdown text if the timer has not been started', () => {
         const text = wrapper.find('#countdown-text');
 
         wrapper.setData({ started: false });
@@ -784,7 +614,7 @@ describe('CountdownTimer.vue', () => {
     });
 
     describe('timerDone', () => {
-      it('should stop the timer', () => {
+      it('stops the timer', () => {
         wrapper.setData({ started: true });
 
         expect(wrapper.vm.started).to.equal(true);
@@ -794,16 +624,15 @@ describe('CountdownTimer.vue', () => {
         expect(wrapper.vm.started).to.equal(false);
       });
 
-      it('should not play the chimes sound if the initial countdown is set to 00:00:00', () => {
+      it('does not play the chimes sound if the initial countdown is set to 00:00:00', () => {
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
+        wrapper = initializeWrapper({
           propsData: {
             hours: 0,
             minutes: 0,
             seconds: 0,
           },
-          attachToDocument: true,
         });
 
         const playSpy = sinon.spy(wrapper.vm.chimes, 'play');
@@ -816,16 +645,15 @@ describe('CountdownTimer.vue', () => {
         playSpy.restore();
       });
 
-      it('should play the chimes sound if the initial countdown seconds are set', () => {
+      it('plays the chimes sound if the initial countdown seconds are set', () => {
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
+        wrapper = initializeWrapper({
           propsData: {
             hours: 0,
             minutes: 0,
             seconds: 1,
           },
-          attachToDocument: true,
         });
 
         const playSpy = sinon.spy(wrapper.vm.chimes, 'play');
@@ -838,16 +666,15 @@ describe('CountdownTimer.vue', () => {
         playSpy.restore();
       });
 
-      it('should play the chimes sound if the initial countdown minutes are set', () => {
+      it('plays the chimes sound if the initial countdown minutes are set', () => {
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
+        wrapper = initializeWrapper({
           propsData: {
             hours: 0,
             minutes: 1,
             seconds: 0,
           },
-          attachToDocument: true,
         });
 
         const playSpy = sinon.spy(wrapper.vm.chimes, 'play');
@@ -860,16 +687,15 @@ describe('CountdownTimer.vue', () => {
         playSpy.restore();
       });
 
-      it('should play the chimes sound if the initial countdown hours are set', () => {
+      it('plays the chimes sound if the initial countdown hours are set', () => {
         wrapper.destroy();
 
-        wrapper = mount(CountdownTimer, {
+        wrapper = initializeWrapper({
           propsData: {
             hours: 1,
             minutes: 0,
             seconds: 0,
           },
-          attachToDocument: true,
         });
 
         const playSpy = sinon.spy(wrapper.vm.chimes, 'play');
@@ -885,62 +711,68 @@ describe('CountdownTimer.vue', () => {
   });
 
   describe('watchers', () => {
-    it('hours should stop the timer and reset it', (done) => {
-      const timerResetSpy = sinon.spy(wrapper.vm, 'timerReset');
+    describe('hours', () => {
+      it('stops the timer and resets it', (done) => {
+        const timerResetSpy = sinon.spy(wrapper.vm, 'timerReset');
 
-      wrapper.setData({ started: true });
+        wrapper.setData({ started: true });
 
-      expect(wrapper.vm.started).to.equal(true);
-      expect(timerResetSpy.notCalled).to.equal(true);
+        expect(wrapper.vm.started).to.equal(true);
+        expect(timerResetSpy.notCalled).to.equal(true);
 
-      wrapper.setProps({ hours: 3 });
+        wrapper.setProps({ hours: 3 });
 
-      wrapper.vm.$nextTick(() => {
         wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.started).to.equal(false);
-          expect(timerResetSpy.called).to.equal(true);
-          timerResetSpy.restore();
-          done();
+          wrapper.vm.$nextTick(() => {
+            expect(wrapper.vm.started).to.equal(false);
+            expect(timerResetSpy.called).to.equal(true);
+            timerResetSpy.restore();
+            done();
+          });
         });
       });
     });
 
-    it('minutes should stop the timer and reset it', (done) => {
-      const timerResetSpy = sinon.spy(wrapper.vm, 'timerReset');
+    describe('minutes', () => {
+      it('stops the timer and resets it', (done) => {
+        const timerResetSpy = sinon.spy(wrapper.vm, 'timerReset');
 
-      wrapper.setData({ started: true });
+        wrapper.setData({ started: true });
 
-      expect(wrapper.vm.started).to.equal(true);
-      expect(timerResetSpy.notCalled).to.equal(true);
+        expect(wrapper.vm.started).to.equal(true);
+        expect(timerResetSpy.notCalled).to.equal(true);
 
-      wrapper.setProps({ minutes: 3 });
+        wrapper.setProps({ minutes: 3 });
 
-      wrapper.vm.$nextTick(() => {
         wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.started).to.equal(false);
-          expect(timerResetSpy.called).to.equal(true);
-          timerResetSpy.restore();
-          done();
+          wrapper.vm.$nextTick(() => {
+            expect(wrapper.vm.started).to.equal(false);
+            expect(timerResetSpy.called).to.equal(true);
+            timerResetSpy.restore();
+            done();
+          });
         });
       });
     });
 
-    it('seconds should stop the timer and reset it', (done) => {
-      const timerResetSpy = sinon.spy(wrapper.vm, 'timerReset');
+    describe('seconds', () => {
+      it('stops the timer and resets it', (done) => {
+        const timerResetSpy = sinon.spy(wrapper.vm, 'timerReset');
 
-      wrapper.setData({ started: true });
+        wrapper.setData({ started: true });
 
-      expect(wrapper.vm.started).to.equal(true);
-      expect(timerResetSpy.notCalled).to.equal(true);
+        expect(wrapper.vm.started).to.equal(true);
+        expect(timerResetSpy.notCalled).to.equal(true);
 
-      wrapper.setProps({ seconds: 3 });
+        wrapper.setProps({ seconds: 3 });
 
-      wrapper.vm.$nextTick(() => {
         wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.started).to.equal(false);
-          expect(timerResetSpy.called).to.equal(true);
-          timerResetSpy.restore();
-          done();
+          wrapper.vm.$nextTick(() => {
+            expect(wrapper.vm.started).to.equal(false);
+            expect(timerResetSpy.called).to.equal(true);
+            timerResetSpy.restore();
+            done();
+          });
         });
       });
     });

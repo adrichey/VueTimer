@@ -1,12 +1,9 @@
-import Vue from 'vue';
+import { shallowMount } from '@vue/test-utils';
+
 import App from '@/App';
 import CountdownTimer from '@/components/CountdownTimer';
 
-Vue.config.devtools = false;
-
 describe('App.vue', () => {
-  const Application = Vue.extend(App);
-
   const timeSegmentOptions = [];
   for (let i = 0; i < 60; i += 1) {
     timeSegmentOptions.push({ label: String(i).padStart(2, '0'), value: i });
@@ -50,6 +47,18 @@ describe('App.vue', () => {
     },
   ];
 
+  let wrapper;
+
+  beforeEach(() => {
+    wrapper = shallowMount(App, {
+      attachToDocument: true,
+    });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it('sets the correct default data', () => {
     expect(typeof App.data).to.equal('function');
 
@@ -66,9 +75,12 @@ describe('App.vue', () => {
     expect(defaultData.expanded).to.equal(false);
   });
 
-  it('should render correctly', () => {
-    const vm = new Application().$mount();
-    const nav = vm.$el.querySelector('nav');
+  it('uses the countdown timer component', () => {
+    expect(App.components.CountdownTimer).to.equal(CountdownTimer);
+  });
+
+  it('renders correctly', () => {
+    const nav = wrapper.vm.$el.querySelector('nav');
 
     expect(nav).to.not.equal(null);
 
@@ -94,16 +106,11 @@ describe('App.vue', () => {
     expect(themeSelector.querySelector('svg > g > path')).not.to.equal(null);
     expect(themeSelector.querySelectorAll('select > option').length).to.equal(themeOptions.length);
 
-    expect(vm.$el.querySelector('#timer')).not.to.equal(null);
+    expect(wrapper.find(CountdownTimer).exists()).to.equal(true);
   });
 
-  it('should use the Timer component', () => {
-    expect(App.components.CountdownTimer).to.equal(CountdownTimer);
-  });
-
-  it('should initialize the timer with the correct properties', () => {
-    const vm = new Application().$mount();
-    const timerProps = vm.$children[0].$props;
+  it('initializes the timer with the correct properties', () => {
+    const timerProps = wrapper.find(CountdownTimer).props();
 
     expect(timerProps.backgroundColor).to.equal(themeOptions[0].backgroundColor);
     expect(timerProps.foregroundColor).to.equal(themeOptions[0].foregroundColor);
@@ -113,19 +120,14 @@ describe('App.vue', () => {
   });
 
   describe('watchers', () => {
-    it('theme changes should set the background and foreground data', (done) => {
-      const vm = new Application().$mount();
+    it('theme changes set the background and foreground data', () => {
+      expect(wrapper.vm.backgroundColor).to.equal('#ffffff');
+      expect(wrapper.vm.foregroundColor).to.equal('#000000');
 
-      expect(vm.backgroundColor).to.equal('#ffffff');
-      expect(vm.foregroundColor).to.equal('#000000');
+      wrapper.setData({ theme: 3 });
 
-      vm.$set(vm.$data, 'theme', 3);
-
-      vm.$nextTick(() => {
-        expect(vm.backgroundColor).to.equal('#ffffff');
-        expect(vm.foregroundColor).to.equal('#0061ff');
-        done();
-      });
+      expect(wrapper.vm.backgroundColor).to.equal('#ffffff');
+      expect(wrapper.vm.foregroundColor).to.equal('#0061ff');
     });
   });
 });
