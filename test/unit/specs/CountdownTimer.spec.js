@@ -51,7 +51,7 @@ describe('CountdownTimer.vue', () => {
     expect(defaultData.timerPercentage).to.equal(1);
     expect(defaultData.timeFraction).to.equal(0);
     expect(defaultData.chimes instanceof Audio).to.equal(true);
-    expect(defaultData.chimes.getAttribute('src')).to.equal('/static/wind-chimes-a.wav');
+    expect(defaultData.chimes.getAttribute('src')).to.equal('static/wind-chimes-a.wav');
   });
 
   it('renders correctly', () => {

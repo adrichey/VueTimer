@@ -82,7 +82,7 @@ export default {
     interval: null,
     timerPercentage: 1, // 1 = 100%, 0.50 = 50%, etc.
     timeFraction: 0, // Fraction to remove from path each tick
-    chimes: new Audio('/static/wind-chimes-a.wav'),
+    chimes: new Audio('static/wind-chimes-a.wav'),
   }),
   computed: {
     timeReadable() {
